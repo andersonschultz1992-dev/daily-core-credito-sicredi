@@ -17,6 +17,6 @@
  * edição feita nesse modo é salva em lugar nenhum.
  */
 window.SUPABASE_CONFIG = {
-  url:     'https://XXXXXXXXXX.supabase.co',  // ← sua Project URL
-  anonKey: '',                                 // ← sua chave anon/public
+  url:     'https://nijnyjfagbujxiugduge.supabase.co',  // ← sua Project URL
+  anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5pam55amZhZ2J1anhpdWdkdWdlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE5NzA0MjcsImV4cCI6MjA5NzU0NjQyN30.yX6qrNm0UYKabWCuqUQ83WncRYBfl55qCL2WUa6kU80',                                 // ← sua chave anon/public
 };
