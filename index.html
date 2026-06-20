@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Daily DevOps — Time Core & Crédito · Confederação Sicredi" />
+  <meta name="theme-color" content="#0F1B16" />
+  <title>Daily Core & Crédito — Sicredi</title>
+
+  <!-- Favicon institucional (SVG inline — hexágono cooperativo + nós de rede) -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%230F1B16'/%3E%3Cpath d='M16 4 L27 10 V22 L16 28 L5 22 V10 Z' fill='none' stroke='%23259A6C' stroke-width='2'/%3E%3Cpath d='M16 10 L10 20 M16 10 L22 20 M10 20 L22 20' stroke='%23628878' stroke-width='1.2'/%3E%3Ccircle cx='16' cy='10' r='2.4' fill='%233FB585'/%3E%3Ccircle cx='10' cy='20' r='2.4' fill='%23357F82'/%3E%3Ccircle cx='22' cy='20' r='2.4' fill='%23BB9748'/%3E%3C/svg%3E" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" crossorigin="anonymous"></script>
+
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+  <!-- BG DECORATION (camadas estáticas e discretas — ver css/style.css) -->
+  <div class="bg-grid" aria-hidden="true"></div>
+  <div class="bg-glow bg-glow--1" aria-hidden="true"></div>
+  <div class="bg-glow bg-glow--2" aria-hidden="true"></div>
+
+  <!-- ═══════════════════════════════════════════
+       HEADER
+  ═══════════════════════════════════════════ -->
+  <header class="site-header" id="site-header">
+    <div class="header-inner">
+
+      <!-- Logo (opcional — adicione assets/img/logo.png; some sem erro se ausente) -->
+      <div class="header-logo-wrap">
+        <img
+          src="assets/img/logo.png"
+          alt="Sicredi"
+          class="header-logo"
+          id="js-logo"
+          onerror="this.style.display='none'"
+        />
+      </div>
+
+      <!-- Badge institucional -->
+      <div class="header-badge">
+        <i class="fa-solid fa-circle-nodes"></i>
+        <span>Coordenação de DevOps · Confederação Sicredi</span>
+      </div>
+
+      <!-- Título editável -->
+      <h1
+        class="header-title"
+        id="js-titulo"
+        data-field="titulo"
+        contenteditable="false"
+        spellcheck="false"
+        aria-label="Título principal"
+      >Principais Entregas da Semana</h1>
+
+      <!-- Subtítulo editável -->
+      <p
+        class="header-subtitle"
+        id="js-subtitulo"
+        data-field="subtitulo"
+        contenteditable="false"
+        spellcheck="false"
+      >Time Core &amp; Crédito</p>
+
+      <!-- Descrição editável -->
+      <p
+        class="header-desc"
+        id="js-descricao"
+        data-field="descricao"
+        contenteditable="false"
+        spellcheck="false"
+      >Resultados, melhorias operacionais, estabilidade e evolução contínua dos ambientes.</p>
+
+      <!-- DATA DA DAILY — agora um seletor de daily histórica -->
+      <div class="header-date-wrap" id="js-date-wrap">
+        <div class="header-date-box">
+          <i class="fa-solid fa-calendar-days"></i>
+          <span class="date-label">Daily DevOps</span>
+          <span class="date-sep">·</span>
+          <select
+            class="date-select"
+            id="js-date-select"
+            aria-label="Selecionar daily por data"
+            title="Selecione uma data para consultar dailies anteriores"
+          >
+            <option value="">Carregando...</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- DESTAQUES PRINCIPAIS (1 a 4, escolhidos na biblioteca de destaques) -->
+      <div class="header-destaque" id="js-destaque"></div>
+
+      <!-- Edição dos destaques principais — visível apenas em modo edição -->
+      <div class="destaque-editor edit-only hidden" id="js-destaque-editor">
+        <div class="destaque-chips" id="js-destaque-chips"></div>
+        <div class="destaque-add-wrap" id="js-destaque-add-wrap">
+          <select class="destaque-add-select" id="js-destaque-add-select" aria-label="Adicionar destaque principal">
+            <option value="">+ Adicionar destaque...</option>
+          </select>
+        </div>
+        <p class="destaque-max-hint hidden" id="js-destaque-max-hint">
+          <i class="fa-solid fa-circle-info"></i> Máximo de 4 destaques por daily atingido — remova um para adicionar outro.
+        </p>
+      </div>
+
+      <!-- Avatares -->
+      <div class="header-avatars" id="js-avatares" role="list" aria-label="Membros do time"></div>
+
+    </div>
+  </header>
+
+  <!-- ═══════════════════════════════════════════
+       TOOLBAR
+  ═══════════════════════════════════════════ -->
+  <div class="toolbar" role="toolbar" aria-label="Ferramentas" id="js-toolbar">
+    <div class="toolbar-left">
+      <div class="search-wrapper">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input
+          type="search"
+          id="js-search"
+          class="search-input"
+          placeholder="Pesquisar analista..."
+          aria-label="Pesquisar analista"
+          autocomplete="off"
+        />
+      </div>
+      <select id="js-sort" class="sort-select" aria-label="Ordenar por">
+        <option value="default">Ordenar por...</option>
+        <option value="nome">Nome (A–Z)</option>
+        <option value="cargo">Cargo</option>
+        <option value="entregas">Qtd. Entregas</option>
+      </select>
+    </div>
+
+    <div class="toolbar-right">
+      <button type="button" id="js-toggle-theme" class="btn btn--ghost" title="Alternar tema claro/escuro">
+        <i class="fa-solid fa-moon" id="js-theme-icon"></i>
+        <span class="btn-label">Tema</span>
+      </button>
+
+      <button type="button" id="js-toggle-edit" class="btn btn--edit" title="Ativar/desativar modo edição">
+        <i class="fa-solid fa-pen-to-square"></i>
+        <span class="btn-label">Editar</span>
+      </button>
+
+      <button type="button" id="js-add-analista" class="btn btn--success edit-only hidden" title="Adicionar analista">
+        <i class="fa-solid fa-user-plus"></i>
+        <span class="btn-label">Add</span>
+      </button>
+
+      <button type="button" id="js-save" class="btn btn--primary edit-only hidden" title="Salvar alterações (Ctrl+S)">
+        <i class="fa-solid fa-floppy-disk"></i>
+        <span class="btn-label">Salvar</span>
+      </button>
+
+      <div class="toolbar-divider"></div>
+
+      <button type="button" id="js-export-img" class="btn btn--ghost" title="Gerar imagem PNG da página inteira">
+        <i class="fa-solid fa-image"></i>
+        <span class="btn-label">Imagem</span>
+      </button>
+
+      <button type="button" id="js-share" class="btn btn--ghost" title="Gerar link compartilhável">
+        <i class="fa-solid fa-share-nodes"></i>
+        <span class="btn-label">Link</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       MAIN CONTENT
+  ═══════════════════════════════════════════ -->
+  <main class="main-content" id="js-main">
+    <div class="cards-grid" id="js-grid" role="list" aria-label="Cards dos analistas"></div>
+    <div class="empty-state hidden" id="js-empty" role="status" aria-live="polite">
+      <i class="fa-solid fa-circle-xmark"></i>
+      <p>Nenhum analista encontrado.</p>
+    </div>
+  </main>
+
+  <!-- ═══════════════════════════════════════════
+       FOOTER
+  ═══════════════════════════════════════════ -->
+  <footer class="site-footer" id="site-footer">
+    <div class="footer-inner">
+      <p class="footer-title">
+        <i class="fa-solid fa-star"></i>
+        Destaques da Semana
+      </p>
+      <ul class="footer-list" id="js-footer-list"></ul>
+      <button type="button" id="js-add-destaque" class="btn btn--ghost edit-only hidden" style="margin-top:14px;">
+        <i class="fa-solid fa-plus"></i>
+        <span class="btn-label">Adicionar destaque</span>
+      </button>
+    </div>
+  </footer>
+
+  <!-- TOAST -->
+  <div class="toast" id="js-toast" role="alert" aria-live="assertive" aria-atomic="true"></div>
+
+  <!-- LOADING -->
+  <div class="loading-overlay" id="js-loading" aria-label="Carregando dados...">
+    <div class="loading-spinner">
+      <div class="loading-spinner-inner"></div>
+    </div>
+    <p class="loading-text">Inicializando<span class="loading-blink">_</span></p>
+  </div>
+
+  <!-- MODAL CONFIRMAÇÃO -->
+  <div class="modal-overlay hidden" id="js-modal" role="dialog" aria-modal="true" aria-labelledby="js-modal-msg">
+    <div class="modal-box">
+      <div class="modal-accent-bar"></div>
+      <p class="modal-msg" id="js-modal-msg"></p>
+      <div class="modal-actions">
+        <button type="button" class="btn btn--ghost" id="js-modal-cancel">Cancelar</button>
+        <button type="button" class="btn btn--danger" id="js-modal-confirm">Confirmar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL SELETOR DE ÍCONE (badge/indicador dos analistas) -->
+  <div class="modal-overlay hidden" id="js-icon-picker" role="dialog" aria-modal="true" aria-labelledby="js-icon-picker-title">
+    <div class="modal-box icon-picker-box">
+      <div class="modal-accent-bar"></div>
+      <p class="modal-msg icon-picker-title" id="js-icon-picker-title">
+        <i class="fa-solid fa-icons"></i> Escolha o ícone do indicador
+      </p>
+      <div class="icon-picker-grid" id="js-icon-picker-grid"></div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn--ghost" id="js-icon-picker-cancel">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Supabase JS client (UMD — expõe window.supabase) -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <!-- Configuração do projeto Supabase (edite js/config.js com suas credenciais) -->
+  <script src="js/config.js"></script>
+  <!-- Biblioteca de destaques pré-definidos (sem IA — 100% local) -->
+  <script src="js/destaques.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,1581 @@
+/* ============================================================
+   DAILY CORE & CRÉDITO — v5.0 "COOPERATIVISMO TECH"
+   Design System: Plataforma corporativa interna
+   Referências: Grafana Enterprise · Dynatrace · Datadog
+   Azure Portal · Elastic Observability · Splunk
+   Sistemas internos bancários modernos
+
+   Paleta: Verde institucional + Verde petróleo + Grafite +
+   Cinza corporativo + Dourado discreto (acento financeiro)
+   ============================================================ */
+
+/* ── RESET ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* ══════════════════════════════════════════════════════════
+   DESIGN TOKENS — "COOPERATIVISMO TECH"
+══════════════════════════════════════════════════════════ */
+:root {
+
+  /* ── Tipografia ── */
+  --font:      'Inter', system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
+
+  /* ── Raios ── */
+  --radius-xs:   4px;
+  --radius-sm:   7px;
+  --radius-md:   12px;
+  --radius-lg:   18px;
+  --radius-xl:   22px;
+  --radius-full: 9999px;
+
+  /* ── Transição ── */
+  --transition: 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* ── Escala de profundidade — Grafite Cooperativo ──
+     Tons neutros com leve subtom esverdeado, sóbrios. */
+  --graphite-950: #0A1410;
+  --graphite-900: #0F1B16;
+  --graphite-850: #14241D;
+  --graphite-800: #1A2D24;
+  --graphite-750: #20372C;
+  --graphite-700: #2A4439;
+  --graphite-600: #38584A;
+  --graphite-500: #4A6F5E;
+  --graphite-400: #628878;
+  --graphite-300: #8AA89A;
+  --graphite-200: #B8CFC4;
+  --graphite-100: #DCE9E3;
+  --graphite-050: #F2F7F5;
+
+  /* ── Verde Institucional (primário) ──
+     Identidade "cooperativismo financeiro". */
+  --green-300: #74D2A6;
+  --green-400: #3FB585;
+  --green-500: #259A6C;
+  --green-600: #1B7C56;
+  --green-700: #145E40;
+  --green-glow: rgba(37, 154, 108, 0.20);
+
+  /* ── Verde Petróleo (secundário) ──
+     Tecnologia / observabilidade. */
+  --petrol-400: #4FA3A6;
+  --petrol-500: #357F82;
+  --petrol-600: #266163;
+  --petrol-700: #1A4849;
+  --petrol-glow: rgba(53, 127, 130, 0.18);
+
+  /* ── Dourado Premium (acento financeiro, uso moderado) ── */
+  --gold-300: #E7CE8E;
+  --gold-400: #D2B26B;
+  --gold-500: #BB9748;
+  --gold-600: #997934;
+  --gold-glow: rgba(187, 151, 72, 0.20);
+
+  /* ── Status ── */
+  --status-ok:   #2FAE74;
+  --status-warn: #D6A23B;
+  --status-err:  #D9594F;
+  --status-info: #4C8FB0;
+
+  /* ── Mapeamento semântico — DARK (padrão) ── */
+  --bg-page:       var(--graphite-900);
+  --bg-surface:    var(--graphite-850);
+  --bg-card:       rgba(20, 36, 29, 0.85);
+  --bg-card-hover: rgba(26, 45, 36, 0.97);
+  --bg-input:      rgba(255, 255, 255, 0.045);
+  --bg-glass:      rgba(37, 154, 108, 0.035);
+
+  --text-primary:   var(--graphite-050);
+  --text-secondary: var(--graphite-200);
+  --text-muted:     var(--graphite-300);
+
+  --border-subtle:  rgba(37, 154, 108, 0.10);
+  --border-card:    rgba(37, 154, 108, 0.18);
+  --border-strong:  rgba(37, 154, 108, 0.40);
+  --border-gold:    rgba(187, 151, 72, 0.28);
+
+  --grad-header:  linear-gradient(168deg, #07120E 0%, #0D1F18 45%, #08140F 100%);
+  --grad-green:   linear-gradient(135deg, #259A6C 0%, #145E40 100%);
+  --grad-petrol:  linear-gradient(135deg, #357F82 0%, #1A4849 100%);
+  --grad-gold:    linear-gradient(135deg, #D2B26B 0%, #997934 100%);
+  --grad-surface: linear-gradient(180deg, rgba(37,154,108,0.045) 0%, transparent 100%);
+
+  --shadow-card:  0 4px 28px rgba(0,0,0,0.50), 0 1px 4px rgba(0,0,0,0.36),
+                  inset 0 1px 0 rgba(255,255,255,0.025);
+  --shadow-hover: 0 10px 40px rgba(0,0,0,0.55),
+                  0 0 0 1px rgba(37,154,108,0.24),
+                  0 0 24px rgba(37,154,108,0.08);
+  --shadow-glow:  0 0 28px rgba(37,154,108,0.16), 0 0 56px rgba(37,154,108,0.06);
+  --shadow-gold:  0 0 22px rgba(187,151,72,0.20);
+  --shadow-btn:   0 4px 14px rgba(37,154,108,0.28);
+}
+
+/* ── LIGHT THEME ── */
+[data-theme="light"] {
+  --bg-page:       #EEF4F1;
+  --bg-surface:    #E4EEE8;
+  --bg-card:       rgba(255, 255, 255, 0.92);
+  --bg-card-hover: rgba(255, 255, 255, 0.99);
+  --bg-input:      rgba(0, 0, 0, 0.045);
+  --bg-glass:      rgba(20, 110, 80, 0.05);
+
+  --text-primary:   #0E1F18;
+  --text-secondary: #33493F;
+  --text-muted:     #5E7A6E;
+
+  --border-subtle:  rgba(20, 110, 80, 0.12);
+  --border-card:    rgba(20, 110, 80, 0.20);
+  --border-strong:  rgba(20, 110, 80, 0.42);
+
+  /* Cabeçalho permanece escuro (masthead institucional)
+     mesmo no tema claro — padrão comum em dashboards
+     corporativos (Grafana, Azure DevOps). */
+  --grad-header:  linear-gradient(168deg, #07140F 0%, #0C211A 45%, #071710 100%);
+
+  --shadow-card:  0 4px 20px rgba(10, 30, 22, 0.10), 0 1px 4px rgba(10, 30, 22, 0.06);
+  --shadow-hover: 0 10px 36px rgba(10, 30, 22, 0.14), 0 0 0 1px rgba(20,110,80,0.24);
+  --shadow-btn:   0 4px 14px rgba(20,110,80,0.26);
+}
+
+/* ══════════════════════════════════════════════════════════
+   BASE
+══════════════════════════════════════════════════════════ */
+html {
+  scroll-behavior: smooth;
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  font-family: var(--font);
+  background-color: var(--bg-page);
+  background-image: linear-gradient(168deg, var(--graphite-950) 0%, var(--graphite-900) 50%, var(--graphite-950) 100%);
+  background-attachment: fixed;
+  color: var(--text-primary);
+  line-height: 1.6;
+  min-height: 100vh;
+  overflow-x: hidden;
+  transition: background-color var(--transition), color var(--transition);
+}
+
+[data-theme="light"] body {
+  background-image: linear-gradient(168deg, #E7F0EB 0%, #EEF4F1 50%, #E7F0EB 100%);
+}
+
+/* Durante a exportação de imagem, o fundo passa a ser "scroll"
+   (em vez de "fixed") para o html2canvas capturar corretamente
+   páginas mais altas que a viewport — ver app.js/exportarImagem(). */
+body.is-exporting {
+  background-attachment: scroll;
+}
+
+/* ══════════════════════════════════════════════════════════
+   BACKGROUND DECORATION
+   (Camadas reduzidas e estáticas — visual sóbrio, sem
+   "scanlines"/ruído que remetem a estética SOC/gamer)
+══════════════════════════════════════════════════════════ */
+
+/* Grade técnica sutil */
+.bg-grid {
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background-image:
+    linear-gradient(rgba(37, 154, 108, 0.026) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(37, 154, 108, 0.026) 1px, transparent 1px);
+  background-size: 48px 48px;
+  mask-image: radial-gradient(ellipse at center, black 30%, transparent 78%);
+  -webkit-mask-image: radial-gradient(ellipse at center, black 30%, transparent 78%);
+}
+
+[data-theme="light"] .bg-grid {
+  background-image:
+    linear-gradient(rgba(20, 110, 80, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(20, 110, 80, 0.05) 1px, transparent 1px);
+}
+
+/* Glows ambientais — estáticos (sem animação contínua),
+   discretos, tons verde/petróleo. */
+.bg-glow {
+  position: fixed; z-index: 0; pointer-events: none;
+  border-radius: 50%; filter: blur(120px);
+}
+
+.bg-glow--1 {
+  width: 620px; height: 620px;
+  background: radial-gradient(circle, rgba(37, 154, 108, 0.12) 0%, transparent 70%);
+  top: -240px; left: -220px;
+}
+
+.bg-glow--2 {
+  width: 520px; height: 520px;
+  background: radial-gradient(circle, rgba(53, 127, 130, 0.10) 0%, transparent 70%);
+  bottom: -180px; right: -180px;
+}
+
+/* No tema claro, os glows ficam bem mais discretos — em fundos
+   claros, cores saturadas tendem a "lavar" a página e destoam de
+   dashboards corporativos (Grafana/Azure Portal em modo claro). */
+[data-theme="light"] .bg-glow--1 {
+  background: radial-gradient(circle, rgba(37, 154, 108, 0.05) 0%, transparent 70%);
+}
+[data-theme="light"] .bg-glow--2 {
+  background: radial-gradient(circle, rgba(53, 127, 130, 0.045) 0%, transparent 70%);
+}
+
+/* Camadas ocultas durante a exportação de imagem
+   (evitam artefatos com position:fixed no html2canvas) */
+body.is-exporting .bg-grid,
+body.is-exporting .bg-glow {
+  display: none;
+}
+
+/* ══════════════════════════════════════════════════════════
+   HEADER
+══════════════════════════════════════════════════════════ */
+.site-header {
+  position: relative; z-index: 2;
+  background: var(--grad-header);
+  border-bottom: 1px solid var(--border-subtle);
+  padding: 36px 32px 48px;
+  overflow: hidden;
+}
+
+/* Barra de acento superior — gradiente tri-cor institucional */
+.site-header::after {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg,
+    transparent       0%,
+    var(--green-500)  20%,
+    var(--petrol-400) 45%,
+    var(--gold-400)   65%,
+    var(--green-600)  85%,
+    transparent       100%
+  );
+  z-index: 3;
+}
+
+/* Radial glow interno no header */
+.site-header::before {
+  content: '';
+  position: absolute; inset: 0; pointer-events: none;
+  background:
+    radial-gradient(ellipse 65% 50% at 50% -5%, rgba(37, 154, 108, 0.13) 0%, transparent 65%),
+    radial-gradient(ellipse 40% 30% at 50% 0%,  rgba(53, 127, 130, 0.08) 0%, transparent 55%);
+}
+
+.header-inner {
+  position: relative;
+  max-width: 1440px; margin: 0 auto;
+  display: flex; flex-direction: column; align-items: center;
+}
+
+/* ── Logo ── */
+.header-logo-wrap {
+  position: absolute; top: 0; left: 0;
+  display: flex; align-items: center;
+  padding: 6px 10px;
+  background: rgba(255,255,255,0.032);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: var(--radius-sm);
+  backdrop-filter: blur(10px);
+  transition: var(--transition);
+}
+.header-logo-wrap:hover {
+  background: rgba(37,154,108,0.07);
+  border-color: rgba(37,154,108,0.20);
+}
+/* Tema escuro — logo fica branco (contraste sobre fundo escuro) */
+.header-logo {
+  height: 44px;
+  width: auto;
+  object-fit: contain;
+  filter: brightness(0) invert(1); /* branco */
+  opacity: 0.88;
+  transition: opacity var(--transition); /* bug corrigido: era --transicao (inexistente) */
+}
+.header-logo:hover { opacity: 1; }
+/* Tema claro — logo volta ao visual original */
+[data-theme="light"] .header-logo {
+  filter: none; /* sem filtro, cor original do PNG */
+}
+
+/* ── Badge institucional ── */
+.header-badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: rgba(37, 154, 108, 0.08);
+  border: 1px solid rgba(37, 154, 108, 0.22);
+  border-radius: var(--radius-xs);
+  padding: 5px 18px;
+  font-size: 10px; font-weight: 700; letter-spacing: 0.14em;
+  color: var(--green-400);
+  text-transform: uppercase;
+  margin-bottom: 22px; margin-top: 6px;
+  font-family: var(--font-mono);
+  box-shadow: 0 0 16px rgba(37,154,108,0.08);
+  position: relative; z-index: 1;
+  transition: var(--transition);
+}
+.header-badge:hover {
+  background: rgba(37,154,108,0.13);
+  border-color: rgba(37,154,108,0.36);
+}
+.header-badge i { font-size: 10px; color: var(--petrol-400); }
+
+/* ── Títulos ── */
+.header-title {
+  font-size: clamp(22px, 4vw, 46px);
+  font-weight: 900; letter-spacing: -0.034em; line-height: 1.10;
+  color: var(--graphite-050);
+  text-align: center; margin-bottom: 10px;
+  text-shadow: 0 0 48px rgba(37,154,108,0.12), 0 2px 10px rgba(0,0,0,0.50);
+  position: relative; z-index: 1;
+  transition: background var(--transition), box-shadow var(--transition);
+}
+[data-theme="light"] .header-title { color: var(--graphite-050); }
+
+/* Subtítulo — gradiente estático (sem shimmer animado),
+   sutil e sóbrio, alinhado com identidade corporativa. */
+.header-subtitle {
+  font-size: clamp(13px, 2.5vw, 22px);
+  font-weight: 700; letter-spacing: 0.02em;
+  background: linear-gradient(92deg,
+    var(--green-400)  0%,
+    var(--petrol-400) 50%,
+    var(--gold-400)   100%
+  );
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-align: center; margin-bottom: 12px;
+  position: relative; z-index: 1;
+}
+
+.header-desc {
+  font-size: 13px;
+  color: rgba(216, 233, 227, 0.46);
+  max-width: 560px; text-align: center; margin-bottom: 22px;
+  line-height: 1.65; position: relative; z-index: 1;
+}
+[data-theme="light"] .header-desc { color: rgba(216, 233, 227, 0.55); }
+
+/* ── Data Daily ── */
+.header-date-wrap { margin-bottom: 26px; position: relative; z-index: 1; }
+.header-date-box {
+  display: inline-flex; align-items: center; gap: 9px;
+  background: rgba(187, 151, 72, 0.08);
+  border: 1px solid rgba(187, 151, 72, 0.26);
+  border-radius: var(--radius-xs);
+  padding: 7px 20px;
+  font-size: 12.5px; font-weight: 600;
+  color: var(--gold-400);
+  font-family: var(--font-mono);
+  box-shadow: 0 0 18px rgba(187,151,72,0.08);
+  transition: var(--transition);
+}
+.header-date-box:hover {
+  background: rgba(187,151,72,0.13);
+  border-color: rgba(187,151,72,0.42);
+}
+.header-date-box i { font-size: 12px; color: var(--gold-500); }
+.date-label {
+  color: rgba(216,233,227,0.50); font-weight: 500;
+  font-size: 10.5px; letter-spacing: 0.06em; text-transform: uppercase;
+  font-family: var(--font);
+}
+.date-sep { color: rgba(216,233,227,0.22); }
+
+/* Seletor de data — substitui o antigo span contenteditable.
+   Funciona em qualquer modo (não depende de Modo Edição): permite
+   navegar pelo histórico de dailies a qualquer momento. */
+.date-select {
+  appearance: none; -webkit-appearance: none;
+  background-color: transparent;
+  border: none;
+  color: var(--gold-400); font-weight: 700;
+  font-family: var(--font-mono); letter-spacing: 0.03em;
+  font-size: 12.5px;
+  padding: 3px 20px 3px 6px;
+  border-radius: var(--radius-xs);
+  cursor: pointer;
+  outline: none;
+  max-width: 240px;
+  transition: var(--transition);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 12 12'%3E%3Cpath fill='%23BB9748' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 3px center;
+}
+.date-select:hover,
+.date-select:focus {
+  background-color: rgba(187,151,72,0.13);
+  box-shadow: 0 2px 12px rgba(187,151,72,0.14);
+}
+.date-select:disabled { cursor: default; opacity: 0.7; }
+.date-select option {
+  background: var(--graphite-850); color: var(--gold-300);
+  font-family: var(--font-mono);
+}
+[data-theme="light"] .date-select option {
+  background: #fff; color: var(--gold-600);
+}
+
+/* ── Avatares ── */
+.header-avatars {
+  display: flex; align-items: center; justify-content: center;
+  gap: 9px; flex-wrap: wrap;
+  position: relative; z-index: 1;
+}
+.avatar-chip {
+  display: flex; align-items: center; gap: 7px;
+  background: rgba(255,255,255,0.038);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: var(--radius-xs);
+  padding: 5px 12px 5px 5px;
+  transition: var(--transition); cursor: default;
+  backdrop-filter: blur(8px);
+}
+.avatar-chip:hover {
+  background: rgba(37,154,108,0.08);
+  border-color: rgba(37,154,108,0.24);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 18px rgba(0,0,0,0.28);
+}
+.avatar-chip img {
+  width: 28px; height: 28px; border-radius: var(--radius-xs);
+  object-fit: cover;
+  border: 1px solid rgba(37,154,108,0.32);
+}
+.avatar-chip-initials {
+  width: 28px; height: 28px; border-radius: var(--radius-xs);
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: 9.5px; font-weight: 800;
+  font-family: var(--font-mono);
+}
+.avatar-chip span.avatar-name {
+  font-size: 11.5px; font-weight: 600;
+  color: var(--graphite-200);
+  letter-spacing: 0.01em;
+}
+
+/* ── Campos editáveis globais ── */
+[contenteditable="false"] { cursor: default; }
+body.edit-mode [data-field] {
+  cursor: text; outline: none;
+  border-bottom: 2px dashed rgba(37, 154, 108, 0.40);
+  padding-bottom: 2px;
+  border-radius: var(--radius-xs);
+}
+body.edit-mode [data-field]:focus {
+  border-bottom-color: var(--green-500);
+  background: rgba(37, 154, 108, 0.07);
+  box-shadow: 0 2px 12px rgba(37,154,108,0.10);
+}
+body.edit-mode .header-subtitle[data-field]:focus {
+  -webkit-text-fill-color: var(--green-400);
+}
+
+/* ══════════════════════════════════════════════════════════
+   TOOLBAR
+══════════════════════════════════════════════════════════ */
+.toolbar {
+  position: sticky; top: 0; z-index: 100;
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 8px;
+  padding: 10px 32px;
+  background: rgba(10, 20, 16, 0.92);
+  backdrop-filter: blur(14px) saturate(1.2);
+  -webkit-backdrop-filter: blur(14px) saturate(1.2);
+  border-bottom: 1px solid var(--border-subtle);
+  transition: background var(--transition), border-color var(--transition);
+}
+
+[data-theme="light"] .toolbar { background: rgba(238, 244, 241, 0.94); }
+
+/* Linha decorativa inferior da toolbar */
+.toolbar::after {
+  content: '';
+  position: absolute; bottom: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(37,154,108,0.16) 25%,
+    rgba(37,154,108,0.28) 50%,
+    rgba(37,154,108,0.16) 75%,
+    transparent 100%
+  );
+  pointer-events: none;
+}
+
+body.edit-mode .toolbar {
+  background: rgba(8, 18, 14, 0.96);
+  border-bottom-color: rgba(37,154,108,0.20);
+  box-shadow: 0 3px 24px rgba(37,154,108,0.06);
+}
+
+.toolbar-left, .toolbar-right {
+  display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+}
+
+/* ── Search ── */
+.search-wrapper { position: relative; display: flex; align-items: center; }
+.search-wrapper > i {
+  position: absolute; left: 11px;
+  color: var(--text-muted); font-size: 11px; pointer-events: none;
+  transition: color var(--transition);
+}
+.search-wrapper:focus-within > i { color: var(--green-500); }
+.search-input {
+  background: var(--bg-input);
+  border: 1px solid var(--border-card);
+  border-radius: var(--radius-xs);
+  padding: 7px 14px 7px 32px;
+  font-family: var(--font); font-size: 12.5px; color: var(--text-primary);
+  width: 200px; outline: none; transition: var(--transition);
+}
+.search-input::placeholder { color: var(--text-muted); }
+.search-input:focus {
+  border-color: var(--green-500);
+  background: rgba(37,154,108,0.05);
+  box-shadow: 0 0 0 3px rgba(37,154,108,0.10);
+  width: 240px;
+}
+
+/* ── Sort ── */
+.sort-select {
+  background: var(--bg-input);
+  border: 1px solid var(--border-card);
+  border-radius: var(--radius-xs);
+  padding: 7px 28px 7px 12px;
+  font-family: var(--font); font-size: 12.5px; color: var(--text-primary);
+  cursor: pointer; outline: none; transition: var(--transition);
+  -webkit-appearance: none; appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%238AA89A' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 10px center;
+}
+.sort-select:focus {
+  border-color: var(--green-500);
+  box-shadow: 0 0 0 3px rgba(37,154,108,0.10);
+}
+.sort-select option { background: var(--graphite-850); color: var(--text-primary); }
+/* CORREÇÃO CONTRASTE: a lista nativa do <select> (.sort-select option)
+   tinha fundo sempre escuro (--graphite-850, token bruto) mas texto
+   trocando de cor com o tema — ficava escuro-sobre-escuro no tema
+   claro. Mesma correção já aplicada em .date-select. */
+[data-theme="light"] .sort-select option { background: #fff; color: var(--text-primary); }
+
+/* ── Divider ── */
+.toolbar-divider { width: 1px; height: 24px; background: var(--border-subtle); margin: 0 3px; }
+
+/* ══════════════════════════════════════════════════════════
+   BOTÕES — SISTEMA COMPLETO
+══════════════════════════════════════════════════════════ */
+.btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 7px 14px;
+  border-radius: var(--radius-xs);
+  font-family: var(--font); font-size: 12.5px; font-weight: 600;
+  border: 1px solid transparent;
+  cursor: pointer; transition: var(--transition);
+  white-space: nowrap; outline: none;
+  letter-spacing: 0.01em;
+  -webkit-tap-highlight-color: transparent;
+  position: relative; overflow: hidden;
+}
+
+/* Micro brilho interno */
+.btn::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.06) 0%, transparent 60%);
+  opacity: 0;
+  transition: opacity var(--transition);
+  pointer-events: none; border-radius: inherit;
+}
+.btn:hover::before  { opacity: 1; }
+.btn:active { transform: scale(0.97); }
+
+.btn:focus-visible { box-shadow: 0 0 0 3px rgba(37,154,108,0.34); }
+.btn:disabled { opacity: 0.38; cursor: not-allowed; pointer-events: none; }
+
+/* Ghost */
+.btn--ghost {
+  background: var(--bg-input); border-color: var(--border-card);
+  color: var(--text-secondary);
+}
+.btn--ghost:hover {
+  background: rgba(37,154,108,0.07); border-color: var(--border-strong);
+  color: var(--text-primary);
+  transform: translateY(-1px);
+}
+
+/* Primary */
+.btn--primary {
+  background: var(--grad-green); border-color: transparent;
+  color: #fff; box-shadow: var(--shadow-btn);
+}
+.btn--primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 26px rgba(37,154,108,0.38);
+}
+.btn--primary:active { transform: translateY(0); }
+
+/* Edit */
+.btn--edit {
+  background: rgba(37,154,108,0.09); border-color: rgba(37,154,108,0.24);
+  color: var(--green-400);
+}
+.btn--edit:hover { background: rgba(37,154,108,0.16); transform: translateY(-1px); }
+.btn--edit.active {
+  background: var(--grad-green); color: #fff; border-color: transparent;
+  box-shadow: var(--shadow-btn);
+}
+
+/* Success */
+.btn--success {
+  background: rgba(53,127,130,0.10); border-color: rgba(53,127,130,0.28);
+  color: var(--petrol-400);
+}
+.btn--success:hover {
+  background: rgba(53,127,130,0.18); border-color: rgba(53,127,130,0.44);
+  transform: translateY(-1px);
+}
+
+/* Danger */
+.btn--danger {
+  background: rgba(217,89,79,0.09); border-color: rgba(217,89,79,0.26);
+  color: var(--status-err);
+}
+.btn--danger:hover {
+  background: rgba(217,89,79,0.20); border-color: rgba(217,89,79,0.42);
+  transform: translateY(-1px);
+}
+
+.hidden { display: none !important; }
+
+/* ══════════════════════════════════════════════════════════
+   MAIN
+══════════════════════════════════════════════════════════ */
+.main-content {
+  position: relative; z-index: 1;
+  max-width: 1440px; margin: 0 auto;
+  padding: 38px 28px 68px;
+}
+
+/* ══════════════════════════════════════════════════════════
+   GRID
+══════════════════════════════════════════════════════════ */
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+@media (max-width: 1280px) { .cards-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 600px)  { .cards-grid { grid-template-columns: 1fr; } }
+
+/* ══════════════════════════════════════════════════════════
+   CARD
+══════════════════════════════════════════════════════════ */
+.analyst-card {
+  position: relative;
+  background: var(--bg-card);
+  border: 1px solid var(--border-card);
+  border-radius: var(--radius-xl);
+  /* blur reduzido (era 20px/1.4) para aliviar custo de GPU
+     com várias cards simultâneas */
+  backdrop-filter: blur(10px) saturate(1.15);
+  -webkit-backdrop-filter: blur(10px) saturate(1.15);
+  box-shadow: var(--shadow-card);
+  display: flex; flex-direction: column;
+  overflow: hidden;
+  transition: transform var(--transition), box-shadow var(--transition),
+              background var(--transition), border-color var(--transition);
+  animation: cardIn 0.50s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* Borda gradiente sutil via pseudo-elemento */
+.analyst-card::after {
+  content: '';
+  position: absolute; inset: 0; border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(135deg,
+    rgba(37,154,108,0.18) 0%,
+    rgba(255,255,255,0.04) 45%,
+    rgba(53,127,130,0.12) 100%
+  );
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none; z-index: 0;
+  opacity: 0.55;
+  transition: opacity var(--transition);
+}
+.analyst-card:hover::after { opacity: 1; }
+
+.analyst-card:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-hover);
+  background: var(--bg-card-hover);
+  border-color: rgba(37,154,108,0.24);
+}
+
+@keyframes cardIn {
+  from { opacity: 0; transform: translateY(24px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+/* Animação de entrada desativada durante a exportação,
+   para a imagem capturar o estado final dos cards */
+body.is-exporting .analyst-card { animation: none !important; opacity: 1 !important; transform: none !important; }
+
+.analyst-card:nth-child(1){animation-delay:.05s}
+.analyst-card:nth-child(2){animation-delay:.10s}
+.analyst-card:nth-child(3){animation-delay:.16s}
+.analyst-card:nth-child(4){animation-delay:.22s}
+.analyst-card:nth-child(5){animation-delay:.28s}
+.analyst-card:nth-child(6){animation-delay:.34s}
+.analyst-card:nth-child(7){animation-delay:.40s}
+.analyst-card:nth-child(8){animation-delay:.46s}
+
+/* ── Linha acento topo ── */
+.card-accent-line {
+  height: 2px; width: 100%; flex-shrink: 0;
+  border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+  position: relative; z-index: 1;
+}
+
+/* ── Botão remover ── */
+.card-remove-btn {
+  position: absolute; top: 10px; right: 10px; z-index: 5;
+  background: rgba(217,89,79,0.08); border: 1px solid rgba(217,89,79,0.20);
+  color: var(--status-err); border-radius: var(--radius-xs);
+  width: 25px; height: 25px;
+  display: none; align-items: center; justify-content: center;
+  cursor: pointer; font-size: 10px; transition: var(--transition);
+}
+.card-remove-btn:hover {
+  background: rgba(217,89,79,0.22); border-color: rgba(217,89,79,0.42);
+  transform: scale(1.10);
+}
+body.edit-mode .card-remove-btn { display: flex; }
+
+/* ── Card Header ── */
+.card-header {
+  padding: 18px 18px 12px;
+  display: flex; align-items: flex-start; gap: 12px;
+  position: relative; z-index: 1;
+  background: var(--grad-surface);
+}
+
+/* ── Foto ── */
+.card-photo-wrap {
+  position: relative; flex-shrink: 0; cursor: default;
+}
+body.edit-mode .card-photo-wrap { cursor: pointer; }
+
+/* Anel da foto — estático (sem rotação contínua).
+   Substitui o conic-gradient animado: melhora performance,
+   reduz "ruído visual" e evita artefatos na exportação PNG. */
+.card-photo-ring {
+  position: absolute; inset: -3px; border-radius: 50%; z-index: 0;
+  border: 2px solid var(--tema-cor, var(--green-500));
+  opacity: 0.45;
+  box-shadow: 0 0 0 4px rgba(255,255,255,0.02);
+  transition: opacity var(--transition);
+}
+.analyst-card:hover .card-photo-ring { opacity: 0.85; }
+
+.card-photo, .card-photo-fallback {
+  position: relative; z-index: 1;
+  width: 64px; height: 64px; border-radius: 50%;
+  border: 2.5px solid var(--bg-card);
+  transition: transform var(--transition);
+  display: block;
+}
+.card-photo { object-fit: cover; }
+.card-photo-fallback {
+  display: flex; align-items: center; justify-content: center;
+  font-size: 19px; font-weight: 800; color: #fff;
+  letter-spacing: -1px; font-family: var(--font-mono);
+}
+.analyst-card:hover .card-photo,
+.analyst-card:hover .card-photo-fallback { transform: scale(1.06); }
+
+.card-photo-overlay {
+  position: absolute; inset: 0; z-index: 2; border-radius: 50%;
+  background: rgba(37,154,108,0.82);
+  display: none; align-items: center; justify-content: center;
+  flex-direction: column; gap: 2px;
+  font-size: 8px; color: #fff; font-weight: 700;
+  pointer-events: none; backdrop-filter: blur(4px);
+}
+.card-photo-overlay i { font-size: 14px; }
+body.edit-mode .card-photo-wrap:hover .card-photo-overlay {
+  display: flex; pointer-events: auto;
+}
+
+/* Selo de câmera — affordance persistente em modo edição,
+   útil para telas touch (tablet/celular) onde :hover não existe. */
+.card-photo-badge {
+  display: none;
+  position: absolute; bottom: -3px; right: -3px; z-index: 3;
+  width: 22px; height: 22px; border-radius: 50%;
+  background: var(--grad-green); color: #fff;
+  align-items: center; justify-content: center;
+  font-size: 10px; border: 2px solid var(--bg-card);
+  box-shadow: var(--shadow-btn);
+  pointer-events: none;
+}
+body.edit-mode .card-photo-badge { display: flex; }
+
+.card-photo-input { display: none; }
+
+/* ── Info ── */
+.card-info { flex: 1; min-width: 0; position: relative; z-index: 1; }
+.card-name {
+  font-size: 13.5px; font-weight: 700; color: var(--text-primary);
+  line-height: 1.28; margin-bottom: 3px;
+  /* CORREÇÃO: nomes longos (ex.: "Gilson Batista da Silva Souza")
+     não devem ser cortados com "...". Permite quebra em 2 linhas
+     em vez de white-space:nowrap + ellipsis (conteúdo nunca fica
+     oculto, conforme requisito de responsividade). */
+  overflow-wrap: break-word; word-break: break-word;
+  letter-spacing: -0.01em;
+}
+.card-cargo {
+  font-size: 9.5px; font-weight: 600; color: var(--text-muted);
+  text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px;
+  font-family: var(--font-mono);
+}
+
+/* ── Editable fields ── */
+.editable-field {
+  outline: none; cursor: default;
+  border-radius: var(--radius-xs);
+  transition: background var(--transition), box-shadow var(--transition);
+  display: block; width: 100%; word-break: break-word;
+}
+body.edit-mode .editable-field {
+  cursor: text;
+  border-bottom: 1px dashed rgba(37,154,108,0.36);
+}
+body.edit-mode .editable-field:hover { background: rgba(37,154,108,0.05); }
+body.edit-mode .editable-field:focus {
+  background: rgba(37,154,108,0.09);
+  border-bottom-color: var(--green-500);
+  box-shadow: 0 2px 10px rgba(37,154,108,0.10);
+}
+
+/* ── Tags ── */
+.card-tags { display: flex; gap: 5px; flex-wrap: wrap; }
+.card-tag {
+  display: inline-flex; align-items: center; gap: 3px;
+  padding: 2px 8px; border-radius: var(--radius-xs);
+  font-size: 8.5px; font-weight: 700; letter-spacing: 0.07em;
+  text-transform: uppercase;
+  border: 1px solid;
+  font-family: var(--font-mono);
+  transition: var(--transition);
+}
+.card-tag:hover { filter: brightness(1.15); transform: translateY(-1px); }
+
+/* ── Badge Métrica ── */
+.card-badge {
+  margin: 0 18px 14px;
+  background: rgba(0,0,0,0.18);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: var(--radius-md);
+  padding: 11px 14px;
+  display: flex; align-items: center; gap: 12px;
+  backdrop-filter: blur(6px);
+  position: relative; z-index: 1;
+  overflow: hidden;
+  transition: border-color var(--transition), background var(--transition);
+}
+.card-badge::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.028) 0%, transparent 55%);
+  pointer-events: none;
+}
+.analyst-card:hover .card-badge {
+  border-color: rgba(255,255,255,0.10);
+  background: rgba(0,0,0,0.26);
+}
+
+.badge-icon {
+  width: 36px; height: 36px; border-radius: var(--radius-sm);
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  position: relative; z-index: 1;
+  transition: transform var(--transition), box-shadow var(--transition);
+}
+.badge-icon i { font-size: 14px; color: #fff; }
+
+/* Clicável apenas em Modo Edição — abre o seletor de ícones
+   reaproveitando a biblioteca de destaques (ver js/app.js). */
+body.edit-mode .badge-icon {
+  cursor: pointer;
+}
+body.edit-mode .badge-icon:hover {
+  transform: scale(1.06);
+  box-shadow: 0 0 0 3px rgba(255,255,255,0.12);
+}
+/* Selo de lápis — affordance persistente (não depende de :hover),
+   essencial em telas touch onde não existe estado de hover. */
+.badge-icon-edit-badge {
+  display: none;
+  position: absolute; bottom: -3px; right: -3px; z-index: 2;
+  width: 16px; height: 16px; border-radius: 50%;
+  background: var(--grad-gold); color: #fff;
+  align-items: center; justify-content: center;
+  font-size: 7.5px; border: 2px solid var(--bg-card);
+  box-shadow: var(--shadow-gold);
+  pointer-events: none;
+}
+body.edit-mode .badge-icon-edit-badge { display: flex; }
+.badge-number {
+  font-size: 21px; font-weight: 900; letter-spacing: -0.035em; line-height: 1;
+  color: var(--tema-cor, var(--green-500));
+  font-family: var(--font-mono);
+}
+.badge-text { font-size: 10px; color: var(--text-muted); font-weight: 500; margin-top: 3px; }
+
+/* Placeholder discreto quando o badge está vazio (toda nova daily
+   começa sem badge — só aparece em Modo Edição para ser preenchido). */
+body.edit-mode .badge-number:empty::before { content: 'Número'; opacity: 0.40; font-weight: 700; }
+body.edit-mode .badge-text:empty::before   { content: 'Descrição do indicador'; opacity: 0.40; }
+
+/* ── Entregas Header ── */
+.card-entregas-header {
+  padding: 0 18px 6px;
+  display: flex; align-items: center; justify-content: space-between;
+  position: relative; z-index: 1;
+}
+.card-entregas-title {
+  font-size: 9.5px; font-weight: 700; letter-spacing: 0.10em;
+  text-transform: uppercase; color: var(--text-muted);
+  display: flex; align-items: center; gap: 5px;
+  font-family: var(--font-mono);
+}
+.card-entregas-title i {
+  color: var(--tema-cor, var(--green-500)); font-size: 9.5px;
+}
+.entregas-count {
+  background: rgba(37,154,108,0.10); color: var(--green-400);
+  font-size: 9.5px; font-weight: 700;
+  padding: 2px 9px; border-radius: var(--radius-full);
+  font-family: var(--font-mono);
+  border: 1px solid rgba(37,154,108,0.20);
+}
+
+/* ── Add Entrega ── */
+.card-add-entrega {
+  display: none; align-items: center; gap: 5px;
+  background: rgba(37,154,108,0.05);
+  border: 1px dashed rgba(37,154,108,0.28);
+  color: var(--green-500); font-size: 10.5px; font-weight: 600;
+  padding: 5px 10px; border-radius: var(--radius-sm);
+  cursor: pointer; transition: var(--transition);
+  margin: 0 18px 6px; width: calc(100% - 36px);
+  font-family: var(--font-mono); letter-spacing: 0.04em;
+  position: relative; z-index: 1;
+}
+.card-add-entrega:hover {
+  background: rgba(37,154,108,0.12);
+  border-color: rgba(37,154,108,0.46);
+  color: var(--green-400);
+  box-shadow: 0 0 12px rgba(37,154,108,0.10);
+}
+body.edit-mode .card-add-entrega { display: flex; }
+
+/* ── Lista Entregas ──
+   max-height/overflow controlam a "janela" de visualização
+   no app; durante exportação e em mobile, o conteúdo
+   completo é exibido (ver regras .is-exporting e media query). */
+.card-entregas {
+  padding: 0 18px 20px; list-style: none;
+  flex: 1; overflow-y: auto; max-height: 270px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(37,154,108,0.16) transparent;
+  position: relative; z-index: 1;
+}
+.card-entregas::-webkit-scrollbar { width: 2px; }
+.card-entregas::-webkit-scrollbar-thumb {
+  background: rgba(37,154,108,0.20); border-radius: 2px;
+}
+.card-entregas::-webkit-scrollbar-thumb:hover {
+  background: rgba(37,154,108,0.36);
+}
+
+/* CORREÇÃO DO BUG DE EXPORTAÇÃO:
+   durante a captura (html2canvas), removemos o limite de
+   altura e o scroll interno para que TODAS as entregas de
+   TODOS os analistas apareçam na imagem final, independente
+   da quantidade de itens. */
+body.is-exporting .card-entregas {
+  max-height: none;
+  overflow: visible;
+}
+
+.entrega-item {
+  display: flex; align-items: flex-start; gap: 8px;
+  padding: 6px 0; border-bottom: 1px solid var(--border-subtle);
+  transition: background var(--transition);
+}
+.entrega-item:last-child { border-bottom: none; }
+.entrega-item:hover { background: rgba(255,255,255,0.013); border-radius: var(--radius-xs); }
+
+.bullet {
+  width: 4px; height: 4px; border-radius: 50%;
+  flex-shrink: 0; margin-top: 7px;
+}
+
+.entrega-text {
+  flex: 1; font-size: 12px; color: var(--text-secondary);
+  line-height: 1.50; outline: none; cursor: default;
+  border-radius: var(--radius-xs); padding: 1px 3px;
+  transition: var(--transition); word-break: break-word;
+}
+body.edit-mode .entrega-text {
+  cursor: text;
+  border-bottom: 1px dashed rgba(37,154,108,0.24);
+}
+body.edit-mode .entrega-text:hover { background: rgba(37,154,108,0.04); }
+body.edit-mode .entrega-text:focus {
+  background: rgba(37,154,108,0.08);
+  border-bottom-color: var(--green-500);
+  color: var(--text-primary);
+}
+
+.entrega-remove {
+  display: none; align-items: center; justify-content: center;
+  width: 19px; height: 19px; flex-shrink: 0;
+  background: rgba(217,89,79,0.07); border: 1px solid rgba(217,89,79,0.18);
+  border-radius: var(--radius-xs); cursor: pointer;
+  color: var(--status-err); font-size: 9px; transition: var(--transition);
+  margin-top: 4px;
+}
+.entrega-remove:hover {
+  background: rgba(217,89,79,0.22); border-color: rgba(217,89,79,0.40);
+  transform: scale(1.10);
+}
+body.edit-mode .entrega-remove { display: flex; }
+
+/* ══════════════════════════════════════════════════════════
+   EMPTY STATE
+══════════════════════════════════════════════════════════ */
+.empty-state {
+  text-align: center; padding: 80px 24px; color: var(--text-muted);
+}
+.empty-state i { font-size: 44px; margin-bottom: 14px; display: block; opacity: 0.32; color: var(--petrol-500); }
+.empty-state p { font-size: 14px; font-family: var(--font-mono); letter-spacing: 0.04em; }
+
+/* ══════════════════════════════════════════════════════════
+   FOOTER
+══════════════════════════════════════════════════════════ */
+.site-footer {
+  position: relative; z-index: 1;
+  background: var(--grad-header);
+  border-top: 1px solid var(--border-subtle);
+  padding: 36px 32px;
+}
+
+/* Linha decorativa superior do footer */
+.site-footer::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(37,154,108,0.22) 25%,
+    rgba(187,151,72,0.28) 50%,
+    rgba(37,154,108,0.22) 75%,
+    transparent 100%
+  );
+}
+
+.footer-inner { max-width: 1200px; margin: 0 auto; text-align: center; }
+/* CORREÇÃO CONTRASTE: .site-footer usa var(--grad-header) — fundo
+   SEMPRE escuro em ambos os temas (mesmo "masthead" do cabeçalho).
+   Os textos abaixo por isso usam tokens brutos --graphite-0xx/1xx/2xx
+   (claros, fixos) em vez de --text-primary/secondary (que trocam com
+   o tema). Valores escolhidos para ficarem visualmente idênticos ao
+   que já existia no tema escuro — nenhuma mudança no modo escuro. */
+.footer-title {
+  font-size: 11px; font-weight: 700; color: var(--graphite-200);
+  margin-bottom: 16px;
+  display: flex; align-items: center; justify-content: center; gap: 7px;
+  text-transform: uppercase; letter-spacing: 0.12em;
+  font-family: var(--font-mono);
+}
+.footer-title i { color: var(--gold-500); font-size: 10.5px; }
+.footer-list {
+  list-style: none;
+  display: flex; flex-wrap: wrap;
+  align-items: center; justify-content: center; gap: 8px;
+}
+.footer-list li {
+  display: flex; align-items: center; gap: 6px;
+  background: rgba(37,154,108,0.045);
+  border: 1px solid rgba(37,154,108,0.14);
+  border-radius: var(--radius-xs);
+  padding: 6px 14px;
+  font-size: 11.5px; color: var(--graphite-100); font-weight: 500;
+  transition: var(--transition);
+  font-family: var(--font-mono); letter-spacing: 0.02em;
+  cursor: default;
+}
+.footer-list li:hover {
+  background: rgba(37,154,108,0.10);
+  border-color: rgba(37,154,108,0.26);
+  color: var(--graphite-050);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.26);
+}
+.footer-list li i { font-size: 10px; color: var(--petrol-400); }
+
+/* ── Destaques do rodapé editáveis (Modo Edição) ── */
+.footer-destaque-text {
+  outline: none; cursor: default;
+  border-radius: var(--radius-xs);
+  transition: background var(--transition), border-color var(--transition);
+}
+body.edit-mode .footer-destaque-text {
+  cursor: text;
+  border-bottom: 1px dashed rgba(37,154,108,0.34);
+}
+body.edit-mode .footer-destaque-text:hover { background: rgba(37,154,108,0.07); }
+body.edit-mode .footer-destaque-text:focus {
+  background: rgba(37,154,108,0.10);
+  border-bottom-color: var(--green-500);
+  color: var(--graphite-050);
+}
+.footer-destaque-remove {
+  display: none; align-items: center; justify-content: center;
+  width: 17px; height: 17px; flex-shrink: 0;
+  background: rgba(217,89,79,0.08); border: 1px solid rgba(217,89,79,0.20);
+  border-radius: var(--radius-xs); cursor: pointer;
+  color: var(--status-err); font-size: 8px;
+  transition: var(--transition);
+}
+.footer-destaque-remove:hover {
+  background: rgba(217,89,79,0.22); border-color: rgba(217,89,79,0.42);
+  transform: scale(1.10);
+}
+body.edit-mode .footer-destaque-remove { display: inline-flex; }
+
+/* ══════════════════════════════════════════════════════════
+   TOAST
+══════════════════════════════════════════════════════════ */
+.toast {
+  position: fixed; bottom: 26px; right: 26px; z-index: 9999;
+  background: rgba(10, 20, 16, 0.96);
+  border: 1px solid rgba(37,154,108,0.32);
+  border-left: 3px solid var(--green-500);
+  border-radius: var(--radius-sm);
+  padding: 11px 20px;
+  /* CORREÇÃO CONTRASTE: o fundo do toast é SEMPRE escuro (em ambos
+     os temas, de propósito — mesmo padrão do header/footer "masthead").
+     Por isso a cor do texto usa o token bruto --graphite-050 (claro,
+     fixo) em vez de --text-primary (que troca com o tema e ficaria
+     escuro-sobre-escuro no tema claro). Valor idêntico ao tema escuro
+     anterior — nenhuma mudança visual no modo escuro. */
+  font-size: 12.5px; color: var(--graphite-050); font-weight: 500;
+  box-shadow: 0 8px 36px rgba(0,0,0,0.50), var(--shadow-glow);
+  backdrop-filter: blur(16px);
+  transform: translateY(80px) scale(0.94); opacity: 0;
+  transition: transform 0.30s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.26s ease;
+  max-width: 320px; pointer-events: none;
+  display: flex; align-items: center; gap: 10px;
+  font-family: var(--font-mono); letter-spacing: 0.01em;
+}
+.toast.show { transform: translateY(0) scale(1); opacity: 1; }
+
+/* ══════════════════════════════════════════════════════════
+   LOADING
+══════════════════════════════════════════════════════════ */
+.loading-overlay {
+  position: fixed; inset: 0; z-index: 9998;
+  background: var(--graphite-950);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 20px;
+  transition: opacity 0.40s ease;
+}
+.loading-overlay.hidden { opacity: 0; pointer-events: none; }
+
+/* Spinner tri-anel */
+.loading-spinner {
+  position: relative;
+  width: 48px; height: 48px;
+}
+.loading-spinner::before {
+  content: '';
+  position: absolute; inset: 0;
+  border: 2px solid rgba(37,154,108,0.12);
+  border-top-color: var(--green-500);
+  border-radius: 50%;
+  animation: spin 0.90s linear infinite;
+  box-shadow: 0 0 18px rgba(37,154,108,0.20);
+}
+.loading-spinner::after {
+  content: '';
+  position: absolute; inset: 7px;
+  border: 1.5px solid rgba(53,127,130,0.12);
+  border-right-color: var(--petrol-500);
+  border-radius: 50%;
+  animation: spin 1.30s linear infinite reverse;
+}
+.loading-spinner-inner {
+  position: absolute; inset: 14px;
+  border: 1.5px solid rgba(187,151,72,0.12);
+  border-bottom-color: var(--gold-500);
+  border-radius: 50%;
+  animation: spin 0.75s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.loading-text {
+  font-size: 10px; color: var(--green-600);
+  font-family: var(--font-mono);
+  letter-spacing: 0.20em; text-transform: uppercase;
+}
+.loading-blink {
+  animation: blink 1.1s step-end infinite;
+  color: var(--green-500);
+}
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+/* ══════════════════════════════════════════════════════════
+   MODAL
+══════════════════════════════════════════════════════════ */
+.modal-overlay {
+  position: fixed; inset: 0; z-index: 9997;
+  background: rgba(0, 0, 0, 0.74);
+  backdrop-filter: blur(10px) saturate(1.2);
+  -webkit-backdrop-filter: blur(10px) saturate(1.2);
+  display: flex; align-items: center; justify-content: center; padding: 24px;
+}
+.modal-box {
+  /* CORREÇÃO CONTRASTE: era um token bruto sempre-escuro
+     (--graphite-850) com .modal-msg usando --text-primary (que troca
+     de cor com o tema) — resultava em texto escuro sobre fundo escuro
+     no tema claro. --bg-surface tem EXATAMENTE o mesmo valor de
+     --graphite-850 no tema escuro (nenhuma mudança visual aqui) e
+     passa a ser um cinza-esverdeado claro e opaco no tema claro,
+     corretamente pareado com --text-primary. */
+  background: var(--bg-surface);
+  border: 1px solid rgba(37,154,108,0.24);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  max-width: 380px; width: 100%;
+  box-shadow: 0 24px 80px rgba(0,0,0,0.68),
+              0 0 0 1px rgba(255,255,255,0.03),
+              inset 0 1px 0 rgba(255,255,255,0.04);
+  animation: modalIn 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+@keyframes modalIn {
+  from { transform: scale(0.88) translateY(16px); opacity: 0; }
+  to   { transform: scale(1) translateY(0); opacity: 1; }
+}
+
+/* Barra de acento topo do modal */
+.modal-accent-bar {
+  height: 2px;
+  background: linear-gradient(90deg, var(--green-500), var(--petrol-500), var(--gold-500));
+}
+
+.modal-msg {
+  font-size: 14.5px; font-weight: 500; color: var(--text-primary);
+  padding: 26px 26px 20px;
+  line-height: 1.58;
+}
+.modal-msg strong { color: var(--green-400); font-weight: 700; }
+.modal-actions { display: flex; gap: 10px; justify-content: flex-end; padding: 0 26px 22px; }
+
+/* ══════════════════════════════════════════════════════════
+   SELETOR DE ÍCONE (badge dos indicadores)
+   ------------------------------------
+   Reaproveita o mesmo modal-overlay/.modal-box do diálogo de
+   confirmação, com um corpo diferente: grade de ícones únicos
+   extraídos da biblioteca de destaques (js/destaques.js).
+══════════════════════════════════════════════════════════ */
+.icon-picker-box {
+  max-width: 360px;
+  /* Em telas baixas (celular em paisagem), evita que o modal
+     ultrapasse a viewport — rola internamente se precisar. */
+  max-height: min(520px, 88vh);
+  display: flex; flex-direction: column;
+}
+.icon-picker-title {
+  display: flex; align-items: center; gap: 9px;
+  padding: 22px 24px 14px;
+}
+.icon-picker-title i { color: var(--green-400); font-size: 15px; }
+
+.icon-picker-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+  padding: 4px 20px 18px;
+  overflow-y: auto;
+}
+.icon-picker-item {
+  display: flex; align-items: center; justify-content: center;
+  /* Alvo de toque ≥44px (recomendação Apple/Google) mesmo em desktop —
+     mantém consistência entre dispositivos com e sem mouse. */
+  width: 100%; aspect-ratio: 1; min-height: 44px;
+  background: var(--bg-input);
+  border: 1px solid var(--border-card);
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  font-size: 16px;
+  cursor: pointer;
+  transition: var(--transition);
+}
+.icon-picker-item:hover {
+  background: rgba(37,154,108,0.10);
+  border-color: var(--green-500);
+  color: var(--green-400);
+  transform: translateY(-1px);
+}
+.icon-picker-item.active {
+  background: var(--grad-green);
+  border-color: transparent;
+  color: #fff;
+  box-shadow: var(--shadow-btn);
+}
+.icon-picker-item:focus-visible { box-shadow: 0 0 0 3px rgba(37,154,108,0.34); }
+
+/* ══════════════════════════════════════════════════════════
+   SCROLLBAR GLOBAL
+══════════════════════════════════════════════════════════ */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: rgba(37,154,108,0.18); border-radius: 5px;
+}
+::-webkit-scrollbar-thumb:hover { background: rgba(37,154,108,0.32); }
+::selection { background: rgba(37,154,108,0.28); color: #fff; }
+
+/* ══════════════════════════════════════════════════════════
+   RESPONSIVIDADE
+   ------------------------------------
+   Breakpoints: 1024px (notebook/tablet paisagem), 768px (tablet
+   retrato/celular grande), 540px (celular). Cobre Chrome, Edge,
+   Safari e Samsung Internet em Android/iPhone, retrato e paisagem.
+══════════════════════════════════════════════════════════ */
+@media (max-width: 1024px) {
+  .site-header { padding: 28px 20px 38px; }
+  .header-logo-wrap { position: static; margin-bottom: 14px; }
+  .header-inner { align-items: center; }
+  .main-content { padding: 28px 16px 52px; }
+}
+
+@media (max-width: 768px) {
+  .toolbar { padding: 9px 14px; }
+  .btn-label { display: none; }
+  /* Alvo de toque mínimo recomendado (~40-44px) — antes era só
+     min-width:34px, pequeno demais para dedo em telas touch. */
+  .btn { padding: 9px 11px; min-width: 40px; min-height: 40px; justify-content: center; }
+  .toolbar-divider { display: none; }
+  .search-input { width: 150px; }
+  .search-input:focus { width: 175px; }
+  .header-logo { height: 38px; }
+  .cards-grid { gap: 15px; }
+
+  /* CORREÇÃO UX MOBILE: remove o scroll interno da lista de
+     entregas em telas pequenas, evitando "scroll dentro de
+     scroll" — o card cresce e a página inteira rola. */
+  .card-entregas { max-height: none; overflow: visible; }
+
+  /* iOS Safari aplica zoom automático ao focar campos com
+     font-size < 16px — todos os controles de formulário usados
+     fora dos cards (busca, ordenação, seletores do cabeçalho)
+     sobem para 16px só neste breakpoint, evitando o zoom
+     indesejado sem alterar a hierarquia visual no desktop. */
+  .search-input, .sort-select, .date-select, .destaque-add-select {
+    font-size: 16px;
+  }
+
+  /* Botões de remoção pequenos demais para toque — aumentados
+     apenas em telas estreitas (desktop mantém o tamanho original). */
+  .card-remove-btn   { width: 32px; height: 32px; font-size: 12px; }
+  .entrega-remove     { width: 28px; height: 28px; font-size: 11px; }
+  .footer-destaque-remove,
+  .destaque-chip-remove { width: 26px; height: 26px; font-size: 10px; }
+
+  /* Seletor de ícones: 4 colunas em vez de 5 — itens maiores e mais
+     fáceis de tocar com precisão. */
+  .icon-picker-grid { grid-template-columns: repeat(4, 1fr); }
+
+  /* Evita que uma pill/chip com texto longo force scroll horizontal
+     da página em telas estreitas. */
+  .destaque-inner, .destaque-chip {
+    max-width: calc(100vw - 48px);
+    white-space: normal;
+  }
+}
+
+@media (max-width: 540px) {
+  .toolbar { flex-direction: column; align-items: stretch; gap: 8px; }
+  .toolbar-left, .toolbar-right { justify-content: center; }
+  .search-input, .search-input:focus { width: 100%; }
+  .site-header { padding: 22px 16px 32px; }
+  .main-content { padding: 18px 12px 44px; }
+  .header-date-box { font-size: 11.5px; padding: 6px 14px; }
+
+  /* Cabeçalho da daily: a caixa de data e o badge institucional
+     ficam um pouco apertados ao lado de textos longos em telas
+     muito estreitas — permite quebrar em vez de cortar/sobrepor. */
+  .header-badge span { white-space: normal; text-align: center; }
+
+  .destaque-editor { padding: 0 4px; }
+  .destaque-add-select { max-width: 100%; }
+  .destaque-max-hint { font-size: 10.5px; }
+
+  /* Modais (confirmação e seletor de ícone) com folga lateral
+     mínima e sem depender de zoom para ler/tocar. */
+  .modal-box { max-width: calc(100vw - 32px); }
+  .icon-picker-grid { grid-template-columns: repeat(4, 1fr); gap: 7px; padding: 4px 16px 16px; }
+  .icon-picker-title { padding: 18px 18px 12px; font-size: 13.5px; }
+
+  /* Card do analista: foto/remover/badge ligeiramente compactados
+     para caber confortavelmente em telas de ~360-390px. */
+  .card-header { gap: 10px; }
+}
+
+/* Telas baixas (celular em modo paisagem, ex.: 740×360) — reduz
+   alturas de overlays para que ações (Confirmar/Cancelar) nunca
+   fiquem fora da viewport sem rolar. */
+@media (max-height: 480px) {
+  .loading-overlay { gap: 12px; }
+  .modal-box, .icon-picker-box { max-height: 90vh; }
+  .icon-picker-grid { max-height: 50vh; }
+  .site-header { padding-top: 18px; padding-bottom: 22px; }
+}
+
+/* ══════════════════════════════════════════════════════════
+   DESTAQUE PRINCIPAL DO CABEÇALHO
+   ------------------------------------
+   Texto, ícone e cor são escolhidos manualmente em Modo Edição,
+   a partir da biblioteca local estática (js/destaques.js) — sem
+   geração automática, sem IA, sem nenhuma chamada de rede.
+   Cor/fundo/borda deste elemento são definidos INLINE via JS
+   (mesmo padrão já usado nas tags e badges dos cards de analista).
+══════════════════════════════════════════════════════════ */
+.header-destaque {
+  position: relative; z-index: 1;
+  margin-bottom: 20px;
+  min-height: 0;
+  display: flex; flex-wrap: wrap; justify-content: center; gap: 10px;
+  transition: opacity var(--transition);
+}
+.header-destaque:empty { display: none; margin-bottom: 0; }
+
+.destaque-inner {
+  display: inline-flex; align-items: center; gap: 11px;
+  border-radius: var(--radius-md);
+  padding: 11px 22px 11px 16px;
+  font-size: 13.5px; font-weight: 600; line-height: 1.3;
+  box-shadow: 0 2px 18px rgba(0,0,0,0.10),
+              inset 0 1px 0 rgba(255,255,255,0.04);
+  transition: transform var(--transition), box-shadow var(--transition);
+  cursor: default;
+  max-width: 560px;
+  animation: destaqueIn 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.destaque-inner:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 24px rgba(0,0,0,0.18);
+}
+.destaque-inner i { font-size: 17px; flex-shrink: 0; }
+
+@keyframes destaqueIn {
+  from { opacity: 0; transform: translateY(10px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* ── Edição dos destaques principais (1 a 4 — Modo Edição) ──
+   Vive no cabeçalho (masthead SEMPRE escuro, em ambos os temas), por
+   isso usa tokens brutos --graphite-xxx (fixos) em vez de
+   --text-primary/--bg-input (que trocam com o tema) — mesma correção
+   de contraste aplicada ao restante do cabeçalho/rodapé/toast. */
+.destaque-editor {
+  position: relative; z-index: 1;
+  margin-bottom: 20px;
+  display: flex; flex-direction: column; align-items: center; gap: 10px;
+}
+
+.destaque-chips {
+  display: flex; flex-wrap: wrap; justify-content: center; gap: 8px;
+  max-width: 640px;
+}
+.destaque-chips-empty {
+  font-size: 12px; color: var(--graphite-300);
+  font-family: var(--font-mono); font-style: italic;
+}
+
+.destaque-chip {
+  display: inline-flex; align-items: center; gap: 8px;
+  border: 1px solid; border-radius: var(--radius-md);
+  padding: 7px 8px 7px 14px;
+  font-size: 12.5px; font-weight: 600; line-height: 1.3;
+  font-family: var(--font);
+  animation: destaqueIn 0.3s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.destaque-chip i:first-child { font-size: 13px; }
+.destaque-chip-remove {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 22px; height: 22px; flex-shrink: 0;
+  background: rgba(217,89,79,0.14); border: 1px solid rgba(217,89,79,0.30);
+  border-radius: var(--radius-full); cursor: pointer;
+  color: var(--status-err); font-size: 9px;
+  transition: var(--transition);
+}
+.destaque-chip-remove:hover {
+  background: rgba(217,89,79,0.28); border-color: rgba(217,89,79,0.50);
+  transform: scale(1.10);
+}
+
+/* ── Select "Adicionar destaque" ── */
+.destaque-add-wrap { display: flex; justify-content: center; width: 100%; }
+.destaque-add-wrap.hidden { display: none; }
+.destaque-add-select {
+  background: rgba(255,255,255,0.045);
+  border: 1px solid rgba(216,233,227,0.16);
+  border-radius: var(--radius-sm);
+  padding: 8px 34px 8px 14px;
+  font-family: var(--font); font-size: 12.5px; font-weight: 600;
+  color: var(--graphite-050);
+  cursor: pointer; outline: none;
+  -webkit-appearance: none; appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%238AA89A' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 13px center;
+  max-width: 420px; width: 100%;
+  transition: var(--transition);
+}
+.destaque-add-select:hover { border-color: rgba(216,233,227,0.30); }
+.destaque-add-select:focus {
+  border-color: var(--green-500);
+  box-shadow: 0 0 0 3px rgba(37,154,108,0.16);
+}
+/* Dropdown da lista nativa — sempre escuro (consistente com o
+   cabeçalho), em AMBOS os temas — diferente dos demais selects do
+   app, este não acompanha o tema claro de propósito. */
+.destaque-add-select option { background: var(--graphite-850); color: var(--graphite-050); }
+
+.destaque-max-hint {
+  font-size: 11px; color: var(--gold-400);
+  font-family: var(--font-mono);
+  display: flex; align-items: center; gap: 6px;
+  text-align: center; max-width: 420px;
+}
+.destaque-max-hint.hidden { display: none; }
+.destaque-max-hint i { font-size: 11px; }
+
+/* ══════════════════════════════════════════════════════════
+   PRINT / EXPORTAÇÃO
+══════════════════════════════════════════════════════════ */
+@media print {
+  .toolbar, .bg-grid, .bg-glow,
+  .card-remove-btn, .card-add-entrega, .entrega-remove { display: none !important; }
+  .analyst-card { break-inside: avoid; }
+  .card-entregas { max-height: none; overflow: visible; }
+}
