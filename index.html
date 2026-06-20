@@ -41,6 +41,47 @@
           onerror="this.style.display='none'"
         />
       </div>
+      <script>
+        // Remove o fundo branco/quase-branco da logo.png via canvas,
+        // transformando esses pixels em transparentes de verdade. Só
+        // mudar a cor do cartão atrás da logo (CSS) não bastaria: se o
+        // arquivo PNG tem fundo OPACO (sem transparência), o branco
+        // continua visível por cima de qualquer cor de fundo que a
+        // gente colocar — é preciso "furar" esses pixels mesmo.
+        // Funciona com qualquer logo.png (transparente ou não); se a
+        // imagem já for transparente, o resultado não muda em nada.
+        (function () {
+          var LIMIAR_BRANCO = 235; // 0-255: quão "branco" precisa ser pra virar transparente
+          var img = document.getElementById('js-logo');
+          if (!img) return;
+
+          function removerFundoBranco() {
+            try {
+              var canvas = document.createElement('canvas');
+              canvas.width = img.naturalWidth;
+              canvas.height = img.naturalHeight;
+              var ctx = canvas.getContext('2d');
+              ctx.drawImage(img, 0, 0);
+              var dados = ctx.getImageData(0, 0, canvas.width, canvas.height);
+              var px = dados.data;
+              for (var i = 0; i < px.length; i += 4) {
+                if (px[i] >= LIMIAR_BRANCO && px[i + 1] >= LIMIAR_BRANCO && px[i + 2] >= LIMIAR_BRANCO) {
+                  px[i + 3] = 0; // alpha = 0 → totalmente transparente
+                }
+              }
+              ctx.putImageData(dados, 0, 0);
+              img.src = canvas.toDataURL('image/png');
+            } catch (e) {
+              // Falha (ex.: imagem de outra origem sem CORS liberado) —
+              // mantém a logo original em vez de travar a página.
+              console.warn('[Logo] Não foi possível remover o fundo automaticamente:', e);
+            }
+          }
+
+          if (img.complete && img.naturalWidth > 0) removerFundoBranco();
+          else img.addEventListener('load', removerFundoBranco);
+        })();
+      </script>
 
       <!-- Badge institucional -->
       <div class="header-badge">
