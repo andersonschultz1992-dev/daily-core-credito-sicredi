@@ -363,6 +363,7 @@ body.is-exporting .bg-glow {
 .header-date-wrap { margin-bottom: 26px; position: relative; z-index: 1; }
 .header-date-box {
   display: inline-flex; align-items: center; gap: 9px;
+  position: relative;
   background: rgba(187, 151, 72, 0.08);
   border: 1px solid rgba(187, 151, 72, 0.26);
   border-radius: var(--radius-xs);
@@ -439,7 +440,6 @@ body.is-exporting .bg-glow {
   opacity: 0; pointer-events: none;
   bottom: 0; left: 0;
 }
-.header-date-box { position: relative; }
 
 /* ── Avatares ── */
 .header-avatars {

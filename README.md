@@ -403,4 +403,30 @@ devem ser usados em elementos cujo fundo também muda com o tema.
 - Pills/chips de destaque quebram linha e nunca forçam rolagem horizontal
   da página, mesmo com texto longo em telas estreitas (~320-360px).
 
+---
 
+## 12. Robustez e tratamento de erros
+
+A aplicação foi revisada para não quebrar diante de cenários de borda
+comuns em produção:
+
+- **Sem dependência rígida de CDN.** Se a rede bloquear o SDK do Supabase
+  ou a biblioteca de imagem (`html2canvas`), o app não estoura erro: cai
+  no modo demonstração (no caso do Supabase) ou avisa com mensagem clara
+  (no caso da exportação de imagem), em vez de travar a tela.
+- **`localStorage` protegido.** Em navegação privada de alguns navegadores
+  (ex.: Safari iOS) ou com armazenamento bloqueado, ler/gravar o tema
+  pode lançar exceção. Isso é tratado — na pior hipótese o tema apenas não
+  é lembrado entre sessões, sem afetar o resto do app.
+- **Entrada de dados defensiva.** Funções de exibição (ex.: geração das
+  iniciais do avatar) lidam com nomes vazios, só com espaços ou nulos sem
+  lançar erro.
+- **Operações de rede com tratamento de erro.** Salvar, excluir, carregar
+  e trocar de data capturam falhas e mostram um aviso amigável, mantendo a
+  interface utilizável.
+- **Segurança contra injeção.** Todo dado vindo do banco/usuário é
+  escapado antes de ir para o HTML (texto via escape de HTML; cores
+  validadas contra um formato seguro antes de entrar em `style`),
+  protegendo contra XSS mesmo que algum valor malicioso seja gravado nas
+  tabelas. Como não há autenticação (ver seção 9), essa sanitização na
+  leitura é a principal barreira — mantenha-a ao editar o código.

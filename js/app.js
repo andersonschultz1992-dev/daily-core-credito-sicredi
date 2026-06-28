@@ -143,6 +143,12 @@
     const cfg = window.SUPABASE_CONFIG;
     if (!cfg || !cfg.url || !cfg.anonKey) return null;
     if (cfg.url.includes('XXXXXXXXXX') || cfg.anonKey === '') return null;
+    // O SDK vem de um CDN; se a rede o bloqueou, window.supabase não
+    // existe. Cai para modo demo de forma limpa (sem TypeError).
+    if (!window.supabase || typeof window.supabase.createClient !== 'function') {
+      console.warn('[Supabase] SDK não carregou (CDN bloqueado?). Usando modo demonstração.');
+      return null;
+    }
     try {
       const { createClient } = window.supabase; // UMD build
       return createClient(cfg.url, cfg.anonKey, { auth: { persistSession: false } });
@@ -518,14 +524,14 @@
     if (!lista.length) { ui.destaqueBox.innerHTML = ''; return; }
 
     ui.destaqueBox.innerHTML = lista.map(d => {
-      const cor   = d.cor   || COR_PADRAO;
+      const cor   = corSegura(d.cor || COR_PADRAO);
       const icone = d.icone || 'fa-solid fa-star';
       const bg1   = hexAlpha(cor, 0.14);
       const bg2   = hexAlpha(cor, 0.09);
       const borda = hexAlpha(cor, 0.32);
       return `
       <div class="destaque-inner" style="background:linear-gradient(100deg,${bg1} 0%,${bg2} 100%);border:1px solid ${borda};color:${cor};">
-        <i class="${escHtml(icone)}" style="color:${cor};" aria-hidden="true"></i>
+        <i class="${escAttr(icone)}" style="color:${cor};" aria-hidden="true"></i>
         <span>${escHtml(d.texto)}</span>
       </div>`;
     }).join('');
@@ -544,12 +550,12 @@
     }
 
     ui.destaqueChips.innerHTML = lista.map(d => {
-      const cor = d.cor || COR_PADRAO;
+      const cor = corSegura(d.cor || COR_PADRAO);
       return `
         <span class="destaque-chip" style="background:${hexAlpha(cor,0.14)};border-color:${hexAlpha(cor,0.36)};color:${cor};">
-          <i class="${escHtml(d.icone || 'fa-solid fa-star')}" style="color:${cor};"></i>
+          <i class="${escAttr(d.icone || 'fa-solid fa-star')}" style="color:${cor};"></i>
           ${escHtml(d.texto)}
-          <button type="button" class="destaque-chip-remove" data-uid="${d._uid}" title="Remover destaque" aria-label="Remover destaque ${escHtml(d.texto)}">
+          <button type="button" class="destaque-chip-remove" data-uid="${escAttr(d._uid)}" title="Remover destaque" aria-label="Remover destaque ${escAttr(d.texto)}">
             <i class="fa-solid fa-xmark"></i>
           </button>
         </span>`;
@@ -622,11 +628,11 @@
       const photo = a.foto || null;
       const first = (a.nome || '').split(' ')[0];
       const inits = getInitials(a.nome);
-      const cor   = a.corTema || COR_PADRAO;
+      const cor   = corSegura(a.corTema || COR_PADRAO);
 
       chip.innerHTML = `
         ${photo
-          ? `<img src="${photo}" alt="${escHtml(a.nome)}" loading="lazy"
+          ? `<img src="${escAttr(photo)}" alt="${escHtml(a.nome)}" loading="lazy"
                onerror="this.style.display='none';this.nextSibling.style.display='inline-flex'" />
              <span class="avatar-chip-initials" style="display:none;
                background:${cor}22;border:2px solid ${cor};
@@ -665,7 +671,7 @@
      BUILD CARD
   ══════════════════════════════════════ */
   function buildCard(a) {
-    const cor      = a.corTema   || COR_PADRAO;
+    const cor      = corSegura(a.corTema || COR_PADRAO);
     const cor22    = hexAlpha(cor, 0.22);
     const cor10    = hexAlpha(cor, 0.10);
     const inits    = getInitials(a.nome);
@@ -686,7 +692,7 @@
       <div class="card-photo-wrap" title="Clique para trocar foto">
         <div class="card-photo-ring"></div>
         ${photo
-          ? `<img class="card-photo" src="${photo}" alt="${escHtml(a.nome)}" loading="lazy"
+          ? `<img class="card-photo" src="${escAttr(photo)}" alt="${escHtml(a.nome)}" loading="lazy"
                onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" />
              <div class="card-photo-fallback" style="display:none;background:linear-gradient(135deg,${cor},${hexAlpha(cor,0.4)})">${inits}</div>`
           : `<div class="card-photo-fallback" style="background:linear-gradient(135deg,${cor},${hexAlpha(cor,0.4)})">${inits}</div>`
@@ -731,7 +737,7 @@
       ${(a.badgeNumero || a.badgeTexto || state.editMode) ? `
       <div class="card-badge">
         <div class="badge-icon" style="background:linear-gradient(135deg,${cor},${hexAlpha(cor,0.6)})" title="Clique para trocar o ícone">
-          <i class="${escHtml(badgeIco)}"></i>
+          <i class="${escAttr(badgeIco)}"></i>
           <span class="badge-icon-edit-badge" aria-hidden="true"><i class="fa-solid fa-pencil"></i></span>
         </div>
         <div>
@@ -950,7 +956,7 @@
 
   function reRenderEntregas(card, a) {
     const ul  = card.querySelector('.card-entregas');
-    const cor = a.corTema || COR_PADRAO;
+    const cor = corSegura(a.corTema || COR_PADRAO);
     if (!ul) return;
     ul.innerHTML = (a.entregas || []).map((e, i) => buildEntregaHTML(e, i, cor)).join('');
     bindEntregaEvents(card, a);
@@ -1330,6 +1336,14 @@
   ══════════════════════════════════════ */
   async function exportarImagem() {
     if (state.exporting) return;
+
+    // html2canvas vem de um CDN; se a rede o bloqueou, avisa de forma
+    // clara em vez de estourar um ReferenceError genérico.
+    if (typeof html2canvas === 'undefined') {
+      showToast('❌ Biblioteca de imagem não carregou. Verifique a conexão e recarregue a página.');
+      return;
+    }
+
     state.exporting = true;
 
     const btn = ui.exportImg;
@@ -1371,7 +1385,7 @@
         }
       });
 
-      const sufixo = (state.dados.dataDailyISO || getSemana());
+      const sufixo = ((state.dados && state.dados.dataDailyISO) || getSemana());
       const link = document.createElement('a');
       link.download = `Daily-Core-Credito-${sufixo}.png`;
       link.href = canvas.toDataURL('image/png', 1.0);
@@ -1424,7 +1438,7 @@
       lista = lista.filter(a =>
         (a.nome || '').toLowerCase().includes(q) ||
         (a.cargo || '').toLowerCase().includes(q) ||
-        (a.entregas || []).some(e => e.toLowerCase().includes(q))
+        (a.entregas || []).some(e => String(e || '').toLowerCase().includes(q))
       );
     }
 
@@ -1484,10 +1498,23 @@
         state.sortBy = ordenar; ui.sort.value = ordenar; mudouFiltro = true;
       }
       if (dailyId && state.supabase && dailyId !== state.currentDailyId) {
-        await carregarDailyPorId(dailyId);
+        // A daily do link pode ter sido excluída ou nem existir. Só
+        // tenta carregar se ela está na lista; senão, avisa e mantém a
+        // daily atual (não quebra o restante do fluxo).
+        const existe = state.dailiesLista.some(d => d.id === dailyId);
+        if (existe) {
+          try {
+            await carregarDailyPorId(dailyId);
+          } catch (err) {
+            console.warn('[restoreFromHash] Falha ao carregar daily do link:', err);
+            showToast('⚠️ A daily desse link não pôde ser aberta. Exibindo a daily atual.');
+          }
+        } else {
+          showToast('⚠️ A daily desse link não existe mais. Exibindo a daily atual.');
+        }
       }
       if (mudouFiltro) filtrarEOrdenar();
-    } catch (_) { /* hash inválido — ignora */ }
+    } catch (_) { /* hash inválido — ignora silenciosamente */ }
   }
 
   function fallbackCopy(text) {
@@ -1503,8 +1530,19 @@
   /* ══════════════════════════════════════
      TEMA
   ══════════════════════════════════════ */
-  function loadTheme() { applyTheme(localStorage.getItem(LS_THEME) || 'dark'); }
-  function toggleTheme() { applyTheme(state.theme === 'dark' ? 'light' : 'dark'); localStorage.setItem(LS_THEME, state.theme); }
+  // localStorage pode lançar SecurityError em navegação privada de
+  // alguns navegadores (ex.: Safari iOS) ou quando o armazenamento está
+  // bloqueado. Estes wrappers evitam que isso derrube o app — na pior
+  // hipótese, o tema simplesmente não é lembrado entre sessões.
+  function lsGet(chave) {
+    try { return localStorage.getItem(chave); } catch (_) { return null; }
+  }
+  function lsSet(chave, valor) {
+    try { localStorage.setItem(chave, valor); } catch (_) { /* ignora */ }
+  }
+
+  function loadTheme() { applyTheme(lsGet(LS_THEME) || 'dark'); }
+  function toggleTheme() { applyTheme(state.theme === 'dark' ? 'light' : 'dark'); lsSet(LS_THEME, state.theme); }
   function applyTheme(t) {
     state.theme = t;
     document.documentElement.setAttribute('data-theme', t);
@@ -1753,9 +1791,17 @@
   function gerarUidTemporario() { return 'novo_' + (Date.now()).toString(36) + '_' + (_uidCounter++); }
 
   function getInitials(nome) {
-    if (!nome) return '?';
-    const parts = nome.trim().split(/\s+/);
-    return parts.length === 1 ? parts[0][0].toUpperCase() : (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+    const limpo = String(nome || '').trim();
+    if (!limpo) return '?';
+    // Considera só "palavras" com ao menos um caractere visível — evita
+    // o caso de string só com espaços, em que split retornaria [''] e
+    // parts[0][0] seria undefined (quebrava o card).
+    const parts = limpo.split(/\s+/).filter(Boolean);
+    if (!parts.length) return '?';
+    const ini = parts.length === 1
+      ? parts[0][0]
+      : parts[0][0] + parts[parts.length - 1][0];
+    return ini.toUpperCase();
   }
 
   function hexAlpha(hex, alpha) {
@@ -1771,6 +1817,26 @@
     return String(str || '')
       .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
       .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+  }
+
+  /** Escape para uso DENTRO de um atributo HTML entre aspas duplas
+   *  (ex.: src="...", title="..."). Igual ao escHtml, mas com nome
+   *  explícito no ponto de uso — deixa claro que o destino é um
+   *  atributo, e protege contra quebra do atributo (ex.: uma foto
+   *  com aspas + onerror injetando JS). */
+  function escAttr(str) {
+    return escHtml(str);
+  }
+
+  /** Valida uma cor antes de injetá-la em um style inline. Só aceita
+   *  formatos seguros (#hex de 3/6 dígitos, rgb()/rgba()); qualquer
+   *  outra coisa cai na cor padrão. Impede que um valor malicioso
+   *  gravado em cor_tema escape do style e injete CSS/JS. */
+  function corSegura(cor) {
+    const c = String(cor || '').trim();
+    if (/^#[0-9a-fA-F]{3}$/.test(c) || /^#[0-9a-fA-F]{6}$/.test(c)) return c;
+    if (/^rgba?\(\s*[\d.]+\s*,\s*[\d.]+\s*,\s*[\d.]+\s*(,\s*[\d.]+\s*)?\)$/.test(c)) return c;
+    return COR_PADRAO;
   }
 
   function getSemana() {
