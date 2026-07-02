@@ -1,5 +1,5 @@
 /**
- * Daily Core & Crédito — app.js v8.2
+ * Daily Core & Crédito — app.js v8.3
  * "Cooperativismo Tech" · Sicredi Identity
  * ────────────────────────────────────────────
  * Arquitetura desta versão (volta à simplicidade, sem IA):
@@ -1567,11 +1567,68 @@
   /* ══════════════════════════════════════
      EXPORTAR IMAGEM (PNG)
   ══════════════════════════════════════ */
+  /**
+   * Converte e baixa o canvas sem depender exclusivamente de toDataURL.
+   * Safari/iOS costuma ser mais estável com toBlob e URL temporária.
+   */
+  async function baixarCanvasComoPng(canvas, nomeArquivo) {
+    const blob = await new Promise((resolve, reject) => {
+      if (typeof canvas.toBlob !== 'function') {
+        try {
+          const dataUrl = canvas.toDataURL('image/png', 1.0);
+          resolve(dataURLParaBlob(dataUrl));
+        } catch (err) {
+          reject(err);
+        }
+        return;
+      }
+
+      canvas.toBlob(
+        blobGerado => blobGerado ? resolve(blobGerado) : reject(new Error('O navegador não conseguiu converter a captura em PNG.')),
+        'image/png',
+        1.0
+      );
+    });
+
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.download = nomeArquivo;
+    link.href = url;
+    link.style.display = 'none';
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+
+    // Revogar imediatamente pode cancelar o download no Safari.
+    window.setTimeout(() => URL.revokeObjectURL(url), 1500);
+  }
+
+  function dataURLParaBlob(dataUrl) {
+    const partes = dataUrl.split(',');
+    const mime = (partes[0].match(/:(.*?);/) || [null, 'image/png'])[1];
+    const bytes = atob(partes[1]);
+    const array = new Uint8Array(bytes.length);
+    for (let i = 0; i < bytes.length; i += 1) array[i] = bytes.charCodeAt(i);
+    return new Blob([array], { type: mime });
+  }
+
+  /**
+   * Define uma escala segura conforme as dimensões da página.
+   * Evita ultrapassar os limites de dimensão/área de canvas do Safari,
+   * Chrome e aparelhos com pouca memória.
+   */
+  function calcularEscalaExportacao(largura, altura) {
+    const dprDesejado = Math.min(2, Math.max(1, window.devicePixelRatio || 1));
+    const MAX_DIMENSAO = 8192;
+    const MAX_AREA = 28 * 1024 * 1024; // margem segura para Safari/iOS
+    const porDimensao = Math.min(MAX_DIMENSAO / largura, MAX_DIMENSAO / altura);
+    const porArea = Math.sqrt(MAX_AREA / (largura * altura));
+    return Math.max(0.6, Math.min(dprDesejado, porDimensao, porArea));
+  }
+
   async function exportarImagem() {
     if (state.exporting) return;
 
-    // html2canvas vem de um CDN; se a rede o bloqueou, avisa de forma
-    // clara em vez de estourar um ReferenceError genérico.
     if (typeof html2canvas === 'undefined') {
       showToast('❌ Biblioteca de imagem não carregou. Verifique a conexão e recarregue a página.');
       return;
@@ -1593,44 +1650,88 @@
 
     ui.toolbar.style.setProperty('display', 'none', 'important');
     document.body.classList.add('is-exporting');
-    await sleep(150);
+
+    // Aguarda layout, fontes e imagens estabilizarem antes da captura.
+    if (document.fonts && document.fonts.ready) {
+      try { await document.fonts.ready; } catch (_) {}
+    }
+    await sleep(180);
 
     try {
-      const docEl  = document.documentElement;
-      const totalH = Math.max(document.body.scrollHeight, document.body.offsetHeight, docEl.scrollHeight, docEl.offsetHeight);
-      const totalW = Math.max(document.body.scrollWidth, docEl.scrollWidth, docEl.clientWidth);
+      const docEl = document.documentElement;
+      // A largura visual evita que um elemento deslocado alguns pixels crie
+      // uma imagem gigantesca. A altura continua cobrindo todo o conteúdo.
+      const totalW = Math.max(docEl.clientWidth, document.body.clientWidth);
+      const totalH = Math.max(
+        document.body.scrollHeight,
+        document.body.offsetHeight,
+        docEl.scrollHeight,
+        docEl.offsetHeight,
+        docEl.clientHeight
+      );
+      const escala = calcularEscalaExportacao(totalW, totalH);
       const bgColor = getComputedStyle(document.body).backgroundColor || '#0F1B16';
 
       const canvas = await html2canvas(document.body, {
-        scale: 2, useCORS: true, allowTaint: true, backgroundColor: bgColor,
-        scrollX: 0, scrollY: 0, x: 0, y: 0,
-        width: totalW, height: totalH, windowWidth: totalW, windowHeight: totalH,
-        logging: false, removeContainer: true, imageTimeout: 8000,
+        scale: escala,
+        useCORS: true,
+        allowTaint: false,
+        backgroundColor: bgColor,
+        scrollX: 0,
+        scrollY: 0,
+        x: 0,
+        y: 0,
+        width: totalW,
+        height: totalH,
+        windowWidth: totalW,
+        windowHeight: totalH,
+        logging: false,
+        removeContainer: true,
+        imageTimeout: 12000,
         onclone: (clonedDoc) => {
+          const clonedBody = clonedDoc.body;
+          if (clonedBody) clonedBody.classList.add('is-exporting');
+
           const tb = clonedDoc.getElementById('js-toolbar');
           if (tb) tb.style.display = 'none';
+
           clonedDoc.querySelectorAll('.card-entregas').forEach(ul => {
-            ul.style.maxHeight = 'none'; ul.style.overflow = 'visible';
+            ul.style.maxHeight = 'none';
+            ul.style.overflow = 'visible';
           });
-          clonedDoc.querySelectorAll('.analyst-card').forEach(c => {
-            c.style.animation = 'none'; c.style.opacity = '1'; c.style.transform = 'none';
+
+          clonedDoc.querySelectorAll('.analyst-card, .pinwheel, .wind-orbit').forEach(el => {
+            el.style.animation = 'none';
+            el.style.transition = 'none';
+          });
+
+          clonedDoc.querySelectorAll('.analyst-card').forEach(card => {
+            card.style.opacity = '1';
+            card.style.transform = 'none';
           });
         }
       });
 
+      if (!canvas.width || !canvas.height) {
+        throw new Error('A captura retornou um canvas vazio.');
+      }
+
       const sufixo = ((state.dados && state.dados.dataDailyISO) || getSemana());
-      const link = document.createElement('a');
-      link.download = `Daily-Core-Credito-${sufixo}.png`;
-      link.href = canvas.toDataURL('image/png', 1.0);
-      link.click();
+      await baixarCanvasComoPng(canvas, `Daily-Core-Credito-${sufixo}.png`);
       showToast('🖼️ Imagem gerada com sucesso!');
     } catch (err) {
       console.error('Erro ao gerar imagem:', err);
-      showToast('❌ Erro ao gerar imagem. Tente novamente.');
+      const detalhe = err && err.name === 'SecurityError'
+        ? ' Uma imagem externa bloqueou a exportação.'
+        : '';
+      showToast(`❌ Erro ao gerar imagem.${detalhe} Recarregue a página e tente novamente.`);
     } finally {
       document.body.classList.remove('is-exporting');
       ui.toolbar.style.removeProperty('display');
-      if (wasEditing) { document.body.classList.add('edit-mode'); applyEditStateToAll(true); }
+      if (wasEditing) {
+        document.body.classList.add('edit-mode');
+        applyEditStateToAll(true);
+      }
       btn.disabled = false;
       btn.innerHTML = originalHTML;
       state.exporting = false;
