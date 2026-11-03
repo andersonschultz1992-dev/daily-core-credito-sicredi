@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="description" content="Histórico de entregas trimestrais — DevOps Core & Crédito" />
+  <meta name="theme-color" content="#0F1B16" id="js-theme-color" />
+  <title>Entrega Trimestral — Core & Crédito · Sicredi</title>
+  <script>
+    (function () {
+      try {
+        var tema = localStorage.getItem('sicredi-daily-theme-v8') || localStorage.getItem('sicredi-daily-theme-v7');
+        if (['dark', 'light', 'cooperative'].includes(tema)) {
+          document.documentElement.setAttribute('data-theme', tema);
+          document.documentElement.style.colorScheme = tema === 'dark' ? 'dark' : 'light';
+        }
+      } catch (_) {}
+    })();
+  </script>
+  <link rel="icon" type="image/png" href="assets/img/logo.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous" />
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/trimestral.css" />
+</head>
+<body class="trimestral-page">
+  <div class="bg-grid" aria-hidden="true"></div>
+  <div class="bg-glow bg-glow--1" aria-hidden="true"></div>
+  <div class="bg-glow bg-glow--2" aria-hidden="true"></div>
+
+  <nav class="app-navigation" aria-label="Páginas do acompanhamento">
+    <a href="./index.html" class="app-nav-link"><i class="fa-solid fa-calendar-check"></i> Agenda de Dailies</a>
+    <a href="./entrega-trimestral.html" class="app-nav-link is-active" aria-current="page"><i class="fa-solid fa-layer-group"></i> Entrega Trimestral</a>
+    <button type="button" id="tri-theme-toggle" class="app-nav-theme" aria-label="Alternar tema" title="Alternar entre Escuro, Claro e Cooperativo"><i class="fa-solid fa-palette"></i> <span id="tri-theme-label">Tema</span></button>
+  </nav>
+
+  <header class="tri-hero">
+    <div class="tri-hero-inner">
+      <div class="tri-brand"><img src="assets/img/logo.png" alt="Sicredi" /><span>Coordenação DevOps · Core & Crédito</span></div>
+      <div class="tri-hero-content">
+        <div>
+          <p class="tri-eyebrow"><i class="fa-solid fa-chart-gantt"></i> ACOMPANHAMENTO E HISTÓRICO</p>
+          <h1>Entrega <span>Trimestral</span></h1>
+          <p class="tri-lead">Organize as iniciativas e épicos entregues pelo time, acompanhe seus owners e consulte o histórico por trimestre.</p>
+        </div>
+        <button type="button" id="tri-new" class="btn btn--primary"><i class="fa-solid fa-plus"></i><span>Nova entrega</span></button>
+      </div>
+    </div>
+  </header>
+
+  <main class="tri-main">
+    <div id="tri-setup-alert" class="tri-alert hidden" role="alert"></div>
+    <section class="tri-stats" aria-label="Resumo dos registros">
+      <div class="tri-stat"><span><i class="fa-solid fa-boxes-stacked"></i> Entregas registradas</span><strong id="tri-count-total">—</strong></div>
+      <div class="tri-stat"><span><i class="fa-solid fa-calendar-days"></i> Trimestre atual</span><strong id="tri-count-current">—</strong></div>
+      <div class="tri-stat"><span><i class="fa-solid fa-clock-rotate-left"></i> Trimestres com histórico</span><strong id="tri-count-quarters">—</strong></div>
+    </section>
+
+    <section class="tri-panel" aria-label="Consulta de entregas trimestrais">
+      <div class="tri-panel-heading">
+        <div><h2>Histórico de entregas</h2><p id="tri-result-count">Carregando dados...</p></div>
+        <button id="tri-reload" type="button" class="btn btn--ghost" title="Atualizar registros"><i class="fa-solid fa-arrows-rotate"></i> Atualizar</button>
+      </div>
+      <div class="tri-filters">
+        <label for="tri-search" class="tri-filter-field tri-filter-search"><span>Pesquisar owners, épico ou iniciativa</span><input type="search" id="tri-search" placeholder="Pesquisar no histórico…" autocomplete="off" /></label>
+        <label for="tri-filter-year" class="tri-filter-field"><span>Ano</span><select id="tri-filter-year"><option value="">Todos os anos</option></select></label>
+        <label for="tri-filter-quarter" class="tri-filter-field"><span>Trimestre</span><select id="tri-filter-quarter"><option value="">Todos</option><option value="1">1º trimestre</option><option value="2">2º trimestre</option><option value="3">3º trimestre</option><option value="4">4º trimestre</option></select></label>
+      </div>
+      <div id="tri-list" class="tri-list" aria-live="polite">
+        <div class="tri-placeholder"><i class="fa-solid fa-spinner fa-spin"></i><p>Carregando histórico do Supabase...</p></div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="tri-footer">Daily Core & Crédito <span>·</span> Histórico de Entregas Trimestrais</footer>
+
+  <!-- Formulário: só permite inserção/edição após obter lock global via RPC -->
+  <div class="tri-modal-overlay hidden" id="tri-form-overlay" role="dialog" aria-modal="true" aria-labelledby="tri-form-title">
+    <div class="tri-modal-box">
+      <div class="tri-modal-heading"><div><p class="tri-eyebrow">REGISTRO TRIMESTRAL</p><h2 id="tri-form-title">Nova entrega</h2></div><button type="button" id="tri-form-close" class="tri-icon-btn" aria-label="Fechar formulário"><i class="fa-solid fa-xmark"></i></button></div>
+      <form id="tri-form">
+        <label for="tri-owners">Owners <span aria-hidden="true">*</span></label>
+        <input id="tri-owners" name="owners" type="text" maxlength="300" required placeholder="Ex.: Anderson Schultz, Diego Oliveira" autocomplete="off" />
+        <p class="tri-field-hint">Informe um ou mais responsáveis, separados por vírgula.</p>
+        <label for="tri-epico">Número do épico <span aria-hidden="true">*</span></label>
+        <input id="tri-epico" name="numero_epico" type="text" maxlength="100" required placeholder="Ex.: DEVOPS-1234" autocomplete="off" />
+        <label for="tri-iniciativa">Iniciativa <span aria-hidden="true">*</span></label>
+        <textarea id="tri-iniciativa" name="iniciativa" rows="4" maxlength="4000" required placeholder="Descreva a iniciativa e o resultado entregue..."></textarea>
+        <label for="tri-data">Data de entrega <span aria-hidden="true">*</span></label>
+        <input id="tri-data" name="data_entrega" type="date" required />
+        <p class="tri-field-hint" id="tri-quarter-preview">O trimestre será calculado automaticamente a partir da data de entrega.</p>
+        <div class="tri-form-actions"><button type="button" class="btn btn--ghost" id="tri-form-cancel">Cancelar</button><button type="submit" class="btn btn--primary" id="tri-form-save"><i class="fa-solid fa-floppy-disk"></i> Salvar entrega</button></div>
+      </form>
+    </div>
+  </div>
+  <div class="tri-modal-overlay hidden" id="tri-confirm-overlay" role="alertdialog" aria-modal="true" aria-labelledby="tri-confirm-title">
+    <div class="tri-modal-box tri-confirm-box"><h2 id="tri-confirm-title">Excluir entrega?</h2><p id="tri-confirm-text">Essa ação não pode ser desfeita.</p><div class="tri-form-actions"><button type="button" class="btn btn--ghost" id="tri-confirm-cancel">Cancelar</button><button type="button" class="btn btn--danger" id="tri-confirm-delete">Excluir entrega</button></div></div>
+  </div>
+  <div class="toast" id="tri-toast" role="status" aria-live="polite"></div>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <script src="js/config.js"></script>
+  <script src="js/trimestral.js"></script>
+</body>
+</html>

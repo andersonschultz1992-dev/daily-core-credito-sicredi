@@ -1,5 +1,5 @@
 /**
- * Daily Core & Crédito — app.js v8.4
+ * Daily Core & Crédito — app.js v9.0
  * "Cooperativismo Tech" · Sicredi Identity
  * ────────────────────────────────────────────
  * Arquitetura desta versão (volta à simplicidade, sem IA):
@@ -222,13 +222,21 @@
   }
 
   async function carregarListaDailies() {
-    const { data, error } = await state.supabase
-      .from('dailies')
-      .select('id, data_daily')
-      .order('data_daily', { ascending: false })
-      .limit(120);
-    if (error) throw error;
-    state.dailiesLista = data || [];
+    // Pagina o histórico: o PostgREST pode limitar cada resposta a 1.000
+    // linhas. Sem paginação, meses antigos poderiam sumir da agenda.
+    const lista = [];
+    const lote = 500;
+    for (let inicio = 0; ; inicio += lote) {
+      const { data, error } = await state.supabase
+        .from('dailies')
+        .select('id, data_daily')
+        .order('data_daily', { ascending: false })
+        .range(inicio, inicio + lote - 1);
+      if (error) throw error;
+      lista.push(...(data || []));
+      if (!data || data.length < lote) break;
+    }
+    state.dailiesLista = lista;
   }
 
   /** Monta uma daily VAZIA em memória (rascunho), sem gravar no banco.
@@ -443,10 +451,13 @@
     const ehRascunho = state.dados && !state.dados.id && state.dados.dataDailyISO
       && !state.dailiesLista.some(d => d.data_daily === state.dados.dataDailyISO);
 
-    let html = state.dailiesLista.map(d => {
-      const label = formatarDataBR(d.data_daily) + (d.data_daily === state.todayISO ? ' · Hoje' : '');
-      return `<option value="${d.id}">${label}</option>`;
-    }).join('');
+    // Agrupa também o seletor nativo por mês/ano para facilitar históricos longos.
+    const meses = agruparDailiesPorMes();
+    let html = meses.map(mes => `<optgroup label="${escAttr(mes.rotulo)}">` +
+      mes.dailies.map(d => {
+        const label = formatarDataBR(d.data_daily) + (d.data_daily === state.todayISO ? ' · Hoje' : '');
+        return `<option value="${escAttr(d.id)}">${escHtml(label)}</option>`;
+      }).join('') + '</optgroup>').join('');
 
     if (ehRascunho) {
       const labelR = formatarDataBR(state.dados.dataDailyISO)
@@ -467,6 +478,22 @@
      daily. Passadas e futuras aparecem; a do dia atual e a que está
      aberta recebem destaque visual.
   ══════════════════════════════════════ */
+  const MESES_BR = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+    'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+
+  function agruparDailiesPorMes() {
+    const grupos = new Map();
+    for (const d of state.dailiesLista) {
+      const chave = String(d.data_daily).slice(0, 7);
+      const [ano, mes] = chave.split('-');
+      if (!grupos.has(chave)) grupos.set(chave, {
+        chave, rotulo: `${MESES_BR[Number(mes) - 1] || mes} ${ano}`, dailies: [],
+      });
+      grupos.get(chave).dailies.push(d);
+    }
+    return [...grupos.values()];
+  }
+
   function renderHistorico() {
     if (!ui.historicoList) return;
 
@@ -477,22 +504,35 @@
       return;
     }
 
-    // Já vem ordenada desc (mais recente primeiro).
-    ui.historicoList.innerHTML = state.dailiesLista.map(d => {
-      const ehHoje  = d.data_daily === state.todayISO;
-      const ehFutura = d.data_daily > state.todayISO;
-      const ativa   = d.id === state.currentDailyId;
-      const tag = ehHoje ? '<span class="historico-tag hoje">Hoje</span>'
-                : ehFutura ? '<span class="historico-tag futura">Futura</span>'
-                : '';
-      return `
-        <li>
-          <button type="button" class="historico-item${ativa ? ' ativa' : ''}" data-id="${d.id}" title="Abrir daily de ${formatarDataBR(d.data_daily)}">
-            <i class="fa-solid fa-calendar-day"></i>
-            <span class="historico-data">${formatarDataBR(d.data_daily)}</span>
-            ${tag}
-          </button>
-        </li>`;
+    // Preserva meses abertos ao atualizar o histórico. Na primeira carga,
+    // abre o mês da daily selecionada (ou o mais recente).
+    const abertos = new Set(Array.from(ui.historicoList.querySelectorAll('details[open]'))
+      .map(el => el.dataset.mes));
+    const primeiraRenderizacao = !ui.historicoList.querySelector('details[data-mes]');
+    const mesAtivo = state.dados?.dataDailyISO?.slice(0, 7);
+    const grupos = agruparDailiesPorMes();
+
+    ui.historicoList.innerHTML = grupos.map((grupo, i) => {
+      const aberto = primeiraRenderizacao
+        ? (grupo.chave === mesAtivo || (!mesAtivo && i === 0))
+        : (abertos.has(grupo.chave) || grupo.chave === mesAtivo);
+      const linhas = grupo.dailies.map(d => {
+        const ehHoje = d.data_daily === state.todayISO;
+        const ehFutura = d.data_daily > state.todayISO;
+        const ativa = d.id === state.currentDailyId;
+        const tag = ehHoje ? '<span class="historico-tag hoje">Hoje</span>'
+                  : ehFutura ? '<span class="historico-tag futura">Futura</span>' : '';
+        return `<li><button type="button" class="historico-item${ativa ? ' ativa' : ''}"
+          data-id="${escAttr(d.id)}" title="Abrir daily de ${formatarDataBR(d.data_daily)}"
+          ${state.editMode ? 'disabled' : ''}>
+          <i class="fa-solid fa-calendar-day" aria-hidden="true"></i>
+          <span class="historico-data">${formatarDataBR(d.data_daily)}</span>${tag}
+        </button></li>`;
+      }).join('');
+      return `<li class="historico-mes"><details data-mes="${grupo.chave}" ${aberto ? 'open' : ''}>
+        <summary class="historico-mes-titulo"><i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
+        <span>${escHtml(grupo.rotulo)}</span><span class="historico-mes-contador">${grupo.dailies.length}</span></summary>
+        <ul class="historico-mes-datas">${linhas}</ul></details></li>`;
     }).join('');
   }
 
@@ -2223,6 +2263,15 @@
     ui.search.addEventListener('input', (e) => { state.query = e.target.value.toLowerCase().trim(); filtrarEOrdenar(); });
     ui.sort.addEventListener('change', (e) => { state.sortBy = e.target.value; filtrarEOrdenar(); });
 
+    // Evita perder alterações da daily ao trocar de página sem salvar.
+    document.querySelectorAll('[data-app-nav]').forEach(link => {
+      link.addEventListener('click', (e) => {
+        if (state.editMode || state.saving || state.editTransition) {
+          e.preventDefault();
+          showToast('⚠️ Salve ou encerre a edição da daily antes de mudar de página.');
+        }
+      });
+    });
     ui.themeBtn.addEventListener('click', toggleTheme);
     ui.editBtn.addEventListener('click', toggleEditMode);
     ui.addAnalista.addEventListener('click', adicionarAnalista);

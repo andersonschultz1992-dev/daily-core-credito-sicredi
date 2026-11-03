@@ -5,14 +5,7 @@ DevOps · Confederação Sicredi). Aplicação **front-end estático** (HTML/CSS
 puro) publicado no **GitHub Pages**, com **Supabase** como única fonte de
 dados — sem JSON local, sem login, sem IA, sem custo de API.
 
-> **v8.4** — correção de carregamento contínuo e exportação PNG multibrowser.
-> O processamento da logo agora é executado uma única vez, eliminando o
-> ciclo de eventos `load` que mantinha a aba do navegador aparentemente
-> carregando. A geração da imagem ganhou limite real de canvas por
-> navegador, timeout de fontes e imagens, tratamento de fotos externas,
-> conversão PNG com fallback e uma segunda tentativa em modo compatível
-> para Safari, Firefox, Chrome e Edge. O bloqueio de edição e o banco não
-> sofreram alterações nesta revisão.
+> **v9.0 — Agenda mensal + Entrega Trimestral**. A Agenda de Dailies passa a agrupar as datas salvas por **mês/ano**, com grupos expansíveis. A navegação superior traz a nova página **Entrega Trimestral**, com formulário de owners, número do épico, iniciativa e data de entrega; consulta histórica por trimestre, filtros, edição/exclusão e persistência no Supabase. Mantidos os recursos originais da daily (temas, cards, destaques, PNG, bloqueio global de edição). Para banco já existente, execute **somente a nova migração** `supabase/migration-entregas-trimestrais.sql`.
 
 ---
 
@@ -21,9 +14,13 @@ dados — sem JSON local, sem login, sem IA, sem custo de API.
 ```
 /
 ├── index.html
+├── entrega-trimestral.html ← nova página independente
+├── PROMPT-MELHORIAS-v9.md ← especificação técnica completa
 ├── css/
-│   └── style.css
+│   ├── style.css
+│   └── trimestral.css ← navegação / agenda mensal / tela trimestral
 ├── js/
+│   ├── trimestral.js   ← CRUD + bloqueio + filtros trimestrais
 │   ├── app.js          ← lógica da aplicação
 │   ├── config.js        ← credenciais do Supabase (edite aqui)
 │   └── destaques.js      ← biblioteca de 34 destaques prontos
@@ -32,7 +29,8 @@ dados — sem JSON local, sem login, sem IA, sem custo de API.
 │   └── img/                 ← logo Sicredi (opcional)
 └── supabase/
     ├── schema.sql            ← SQL completo: tabelas, índices e RLS
-    └── migration-edit-lock.sql ← migração do bloqueio para bancos existentes
+    ├── migration-edit-lock.sql ← migração do bloqueio para bancos antigos
+    └── migration-entregas-trimestrais.sql ← execute em seu Supabase existente
 ```
 
 Não há mais `data/analistas.json`, não há `admin.html`, não há
@@ -47,9 +45,9 @@ Não há mais `data/analistas.json`, não há `admin.html`, não há
   `#3FA110`, `#146E37`, `#D7E6C8`, branco e amarelo como protagonistas,
   com cata-ventos animados ao fundo.
 - **Supabase é a única fonte de dados.** Todas as dailies, analistas,
-  entregas, destaques e bloqueios ficam em 6 tabelas (`dailies`,
+  entregas, destaques e bloqueios ficam em 7 tabelas (`dailies`,
   `analistas`, `entregas`, `destaques`, `destaques_cabecalho`,
-  `app_edit_locks`) — ver
+  `app_edit_locks`, `entregas_trimestrais`) — ver
   `supabase/schema.sql`.
 - **Bloqueio global de edição.** Ao clicar em **Editar**, o navegador
   adquire uma reserva atômica no Supabase. Enquanto ela estiver ativa,
@@ -87,7 +85,7 @@ Não há mais `data/analistas.json`, não há `admin.html`, não há
   (futuro ou passado). Se já houver daily naquela data, ela é carregada;
   se não, abre um rascunho vazio para preencher e salvar.
 - **Histórico sempre disponível.** A "Agenda de Dailies" na lateral lista
-  **apenas datas que têm daily salva** (rascunhos não preenchidos não
+  **apenas datas que têm daily salva**, agrupadas por mês/ano (rascunhos não preenchidos não
   aparecem) — escolher uma carrega aquela daily inteira na hora, sem
   recarregar a página.
 
@@ -99,13 +97,33 @@ Não há mais `data/analistas.json`, não há `admin.html`, não há
 
 1. Crie um projeto gratuito em [supabase.com](https://supabase.com).
 2. Vá em **SQL Editor** e execute todo o conteúdo de `supabase/schema.sql`.
-   Isso cria as 4 tabelas, índices, um trigger de `updated_at` e as
-   políticas de RLS (veja a seção de Segurança abaixo). Ao final, se o
-   banco estiver vazio, o script semeia automaticamente a daily de hoje
-   com o roster padrão do time (conveniência opcional — o app também sabe
-   fazer isso sozinho).
+   Isso cria as tabelas (inclusive `entregas_trimestrais`), índices, triggers
+   de `updated_at` e as políticas de RLS (veja a seção de Segurança abaixo). Nenhuma daily vazia é criada automaticamente.
 
-### 3.2 Configurar as credenciais no front-end
+### 3.2 Atualizar um Supabase **já existente** (caso mais comum)
+
+**Não execute `schema.sql` novamente se seu banco já possui as tabelas das dailies.**
+No Dashboard do Supabase, abra **SQL Editor**, cole e execute o conteúdo de:
+
+```text
+supabase/migration-entregas-trimestrais.sql
+```
+
+Essa migração cria **apenas** a tabela `entregas_trimestrais`, os índices,
+o trigger de atualização e as políticas necessárias. **Não exclui nem altera
+as dailies atuais.** É segura para executar novamente se necessário.
+Não precisa reexecutar `migration-edit-lock.sql` quando a edição já funciona.
+
+Para conferir após a execução:
+
+```sql
+SELECT * FROM public.entregas_trimestrais ORDER BY data_entrega DESC LIMIT 10;
+```
+
+A tabela inicialmente estará vazia. Acesse o novo menu **Entrega Trimestral**
+e clique em **Nova entrega** para começar a registrar.
+
+### 3.3 Configurar as credenciais no front-end
 
 Edite `js/config.js`:
 
@@ -120,12 +138,12 @@ Pegue os dois valores em **Settings → API** no painel do Supabase. A chave
 `anon/public` é segura para uso no front-end — o controle de acesso é feito
 pelas políticas de RLS (Row Level Security), não pelo sigilo da chave.
 
-### 3.3 Modo demonstração (sem configurar nada)
+### 3.4 Modo demonstração (sem configurar nada)
 
-Enquanto `js/config.js` mantiver os valores padrão (URL com `XXXXXXXXXX` ou
-`anonKey` vazia), o app **continua funcionando** — mostra um conjunto fixo
-de dados de demonstração, com edição liberada normalmente, só que nada é
-persistido entre recarregamentos da página. Isso garante que o app nunca
+Enquanto `js/config.js` mantiver os valores de exemplo (URL com `XXXXXXXXXX` ou
+`anonKey` vazia), a tela das dailies **continua funcionando** — mostra um conjunto fixo
+de dados de demonstração. A página trimestral exige uma conexão real com
+o banco e mostra um aviso quando a conexão ou tabela não está disponível. Isso garante que o app nunca
 abre em branco, mesmo antes de qualquer configuração de backend.
 
 ---
@@ -185,8 +203,8 @@ jeito: selecione e edite normalmente.
 
 ### Consultando dailies pelo histórico
 
-A "Agenda de Dailies" na lateral lista **apenas as datas que têm daily
-salva**, mais recente primeiro. Rascunhos ainda não preenchidos não
+A "Agenda de Dailies" na lateral agrupa **apenas as datas que têm daily
+salva** por **mês e ano**, mais recente primeiro. Expanda/recolha qualquer mês. Rascunhos ainda não preenchidos não
 aparecem ali. Clique em uma data para carregar aquela daily na hora.
 
 ### Excluir uma daily
@@ -327,8 +345,12 @@ created_at / updated_at  badge_numero                                           
   nenhuma daily de exemplo: o roster inicial é montado em memória pelo
   app, não gravado no banco.
 
-> **Atualizando de uma versão anterior?** O `schema.sql` migra
-> automaticamente: se as colunas antigas `dailies.destaque_texto` /
+> **Atenção a instalações antigas:** scripts anteriores do `schema.sql` contêm
+> políticas `CREATE POLICY` não idempotentes. Não use o `schema.sql` completo
+> como migração em um banco já existente. Use somente a migração incremental
+> `migration-entregas-trimestrais.sql`. O `schema.sql` inclui rotinas legadas
+> que migram destaques, mas deve ser tratado como script de instalação inicial.
+> Nas versões antigas: se as colunas antigas `dailies.destaque_texto` /
 > `destaque_icone` / `destaque_cor` (modelo de destaque único) ainda
 > existirem, o script copia o valor para `destaques_cabecalho` e remove
 > as colunas antigas. Basta rodar o arquivo de novo no SQL Editor —
@@ -350,9 +372,9 @@ Daily — o mesmo nível de confiança que já existia quando os dados ficavam
 apenas no navegador de cada pessoa. Pontos a ter em mente:
 
 - A chave `anon` do Supabase fica embutida no código público do GitHub
-  Pages — isso é esperado e seguro *desde que* as políticas de RLS estejam
-  configuradas como no `schema.sql` (nunca use a chave `service_role` no
-  front-end).
+  Pages — ela foi concebida para ser pública, **mas as políticas RLS atuais
+  concedem escrita irrestrita**. Não trate isso como proteção de segurança
+  (e nunca use a chave `service_role` no front-end).
 - Qualquer pessoa com o link pode editar ou até excluir dados. Para um
   app interno de equipe pequena isso costuma ser aceitável; não é
   recomendado para dados sensíveis ou públicos na internet sem mais
@@ -367,10 +389,11 @@ apenas no navegador de cada pessoa. Pontos a ter em mente:
 
 ## 10. Compatibilidade
 
-Testado em Chrome/Edge/Firefox/Safari recentes (desktop) e em Chrome,
-Safari e **Samsung Internet** (Android/iPhone), nas resoluções Desktop
-Full HD, Ultrawide, Notebook, iPad/Android (tablet, retrato e paisagem) e
-iPhone/Android (celular, retrato e paisagem).
+A arquitetura foi preparada para Chrome, Edge, Firefox e Safari (desktop e
+mobile). Na v9.0, foram executadas verificações locais de renderização e
+fluxos principais com dados simulados em Chromium em larguras de 1440, 390 e
+320 px. **A v9.0 não foi validada com o Supabase de produção nem em um
+iPhone físico**; recomenda-se realizar esses testes antes do uso da equipe.
 
 Recursos usados: `fetch`, `@supabase/supabase-js` (via CDN), `Canvas`
 (compressão de fotos), `URLSearchParams`, `clipboard API` (com fallback via
@@ -452,3 +475,67 @@ comuns em produção:
 ## Bloqueio de edição (v8.3)
 
 Antes de publicar esta versão em um ambiente que já possui o banco criado, execute no SQL Editor do Supabase o arquivo `supabase/migration-edit-lock.sql`. Ele cria o bloqueio global atômico, com renovação automática e expiração de segurança em 120 segundos.
+
+---
+
+## 13. Nova página — Entrega Trimestral (v9.0)
+
+Na navegação superior, clique em **Entrega Trimestral**. A interface possui:
+
+- **Cadastro/edição/exclusão**: owners (um ou vários nomes), número do épico
+  (ex.: `CORE-123`), iniciativa (texto livre) e data de entrega (calendário).
+- **Histórico persistente**: cada entrega é um registro próprio em
+  `public.entregas_trimestrais`; editar atualiza o registro e excluir remove
+  somente a entrega selecionada, nunca uma daily.
+- **Agrupamento automático** por trimestre e ano, calculado a partir da
+  data de entrega (sem entrada duplicada de trimestre).
+- **Pesquisa** por owners, número do épico ou iniciativa, além de filtros por
+  ano e trimestre. O topo mostra quantidade total, entregas do trimestre
+  atual e total de trimestres com registros.
+- **Edição exclusiva entre as duas páginas**: o novo CRUD utiliza a mesma
+  chave de bloqueio global das dailies, com renovação a cada 30 segundos,
+  duração de 120 segundos e liberação no cancelamento/salvamento.
+
+A interface funciona com os três temas já existentes, inclusive Safari no
+smartphone, e não usa dados fictícios como se estivessem salvos: sem tabela
+ou Supabase acessível, exibe instrução explícita de configuração.
+
+### Publicar a versão no GitHub Pages
+
+1. **Antes de subir o código**, execute a migração trimestral acima no SQL
+   Editor do Supabase atual (se a aplicação já está em produção).
+2. Faça backup do repositório atual e envie **todo o conteúdo interno** da
+   pasta do ZIP para a raiz do repositório GitHub (substitua arquivos
+   existentes e inclua os novos). Preserve `js/config.js` do pacote ou
+   confira sua configuração de URL e chave pública.
+3. Confirme que `index.html` e `entrega-trimestral.html` estão ambos na raiz.
+   Reaplique a publicação `main / (root)` em Settings → Pages se necessário.
+4. Teste uma daily histórica, o PNG, a troca de temas, a navegação entre as
+   páginas, e um ciclo **criar → atualizar → recarregar → excluir** no histórico
+   trimestral. Teste o bloqueio com duas abas ou dois navegadores distintos.
+
+### Segurança existente (importante)
+
+**O bloqueio evita edições simultâneas dentro da interface, mas não impede
+requisições diretas à API.** Assim como a versão anterior, a RLS permite
+escrita para a chave pública (`anon`) sem login. O GitHub Pages é público;
+portanto, **não coloque informações confidenciais** nesta tabela sem antes
+implantar autenticação e RLS restritiva. Nunca use a chave `service_role`
+no navegador.
+
+### Arquivos adicionados/alterados
+
+| Arquivo | Ação |
+| --- | --- |
+| `index.html` | Navegação entre páginas |
+| `js/app.js` | Agenda por mês/ano e seletor com grupos |
+| `entrega-trimestral.html` | **Novo**: página de histórico trimestral |
+| `js/trimestral.js` | **Novo**: CRUD, consulta, filtros, lock cooperativo |
+| `css/trimestral.css` | **Novo**: layout responsivo, navegação e agenda |
+| `supabase/schema.sql` | Novo schema para instalações do zero |
+| `supabase/migration-entregas-trimestrais.sql` | **Novo**: migração para banco existente |
+| `PROMPT-MELHORIAS-v9.md` | **Novo**: especificação técnica completa |
+| `README.md` | Instruções de migração e publicação |
+
+As imagens, `js/destaques.js`, `css/style.css`, `js/config.js` e
+`supabase/migration-edit-lock.sql` foram mantidos.

@@ -1,0 +1,122 @@
+/* Daily Core & Crédito v9.0 — Navegação + agenda mensal + Entrega Trimestral. */
+.app-navigation {
+  position: relative; z-index: 5; width: 100%;
+  display: flex; align-items: center; justify-content: center; flex-wrap: wrap;
+  padding: 12px max(16px, env(safe-area-inset-right)); gap: 10px;
+  border-bottom: 1px solid var(--border-card); background: var(--bg-surface);
+}
+.app-nav-link, .app-nav-theme {
+  display: inline-flex; align-items: center; justify-content: center; gap: 9px;
+  color: var(--text-secondary); padding: 9px 16px; text-decoration: none;
+  border: 1px solid var(--border-card); border-radius: 10px; background: var(--bg-card);
+  font-family: var(--font); font-size: 12px; line-height: 1.5; font-weight: 700;
+  cursor: pointer; transition: background .2s, color .2s, border-color .2s;
+}
+.app-nav-link:hover, .app-nav-theme:hover { border-color: var(--green-500); color: var(--text-primary); }
+.app-nav-link.is-active { background: rgba(37,154,108,.16); color: var(--green-400); border-color: var(--green-500); }
+.app-navigation a:focus-visible, .app-navigation button:focus-visible, .historico-mes summary:focus-visible { outline: 2px solid var(--green-400); outline-offset: 2px; }
+
+/* Agrupamento por mês, dentro do painel existente — sem alterar a interação dos dias. */
+.historico-list .historico-mes { list-style: none; }
+.historico-mes details { border: 1px solid var(--border-card); border-radius: 9px; overflow: hidden; }
+.historico-mes summary { display: flex; align-items: center; gap: 8px; padding: 11px 10px; cursor: pointer; font: 700 11px var(--font); color: var(--text-primary); background: var(--bg-card); list-style: none; user-select: none; }
+.historico-mes summary::-webkit-details-marker { display: none; }
+.historico-mes summary i { font-size: 9px; color: var(--green-400); transition: transform .2s; }
+.historico-mes details[open] summary i { transform: rotate(90deg); }
+.historico-mes-contador { margin-left: auto; background: rgba(37,154,108,.16); color: var(--green-400); border-radius: 99px; padding: 2px 7px; font: 700 10px var(--font-mono); }
+.historico-mes-datas { list-style: none; padding: 6px; display: flex; flex-direction: column; gap: 5px; }
+.historico-mes-datas .historico-item { padding: 8px; font-size: 11px; }
+
+/* Página Entrega Trimestral */
+.trimestral-page .tri-hero { position: relative; z-index: 1; background: var(--grad-header); border-bottom: 1px solid var(--border-card); }
+.tri-hero-inner { max-width: 1280px; margin: 0 auto; padding: 26px 26px 40px; }
+.tri-brand { display: flex; align-items: center; gap: 16px; margin-bottom: 28px; color: #d2e9dd; font-size: 11px; font-weight: 700; }
+.tri-brand img { width: 112px; height: 53px; object-fit: contain; border-radius: 6px; }
+.tri-hero-content { display: flex; align-items: flex-end; justify-content: space-between; gap: 28px; }
+.tri-eyebrow { font: 700 10px var(--font-mono); letter-spacing: .10em; color: #72d6a6; margin-bottom: 8px; }
+.tri-hero h1 { font-size: clamp(30px, 5vw, 54px); line-height: 1.13; letter-spacing: -.04em; color: #f3f8f5; margin-bottom: 12px; }
+.tri-hero h1 span { color: #63cb94; }
+.tri-lead { color: #b6d0c2; font-size: 13px; max-width: 620px; line-height: 1.8; }
+.tri-hero .btn { flex-shrink: 0; white-space: nowrap; }
+.tri-main { width: 100%; max-width: 1280px; padding: 26px; margin: 0 auto; flex: 1 0 auto; position: relative; z-index: 1; }
+.tri-stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin-bottom: 24px; }
+.tri-stat { border: 1px solid var(--border-card); border-radius: 14px; padding: 18px 20px; background: var(--bg-card); box-shadow: var(--shadow-card); }
+.tri-stat span { display: flex; gap: 9px; align-items: center; color: var(--text-muted); font-size: 11px; font-weight: 600; }
+.tri-stat span i { color: var(--green-400); }
+.tri-stat strong { display: block; font-size: 30px; color: var(--text-primary); margin-top: 4px; font-family: var(--font-mono); }
+.tri-panel { border: 1px solid var(--border-card); background: var(--bg-card); box-shadow: var(--shadow-card); border-radius: 16px; padding: 22px; }
+.tri-panel-heading { display: flex; gap: 10px; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+.tri-panel-heading h2 { color: var(--text-primary); font-size: 19px; letter-spacing: -.02em; }
+.tri-panel-heading p { color: var(--text-muted); font-size: 11px; margin-top: 4px; }
+.tri-filters { display: grid; grid-template-columns: minmax(220px, 2fr) minmax(110px, 1fr) minmax(130px, 1fr); gap: 12px; margin-bottom: 22px; }
+.tri-filter-field { display: flex; flex-direction: column; gap: 7px; min-width: 0; font-size: 11px; color: var(--text-muted); font-weight: 700; }
+.tri-filter-field input, .tri-filter-field select, .tri-modal-box input, .tri-modal-box textarea {
+  width: 100%; min-width: 0; padding: 12px 13px; border: 1px solid var(--border-card);
+  border-radius: 9px; background: var(--bg-input); color: var(--text-primary);
+  font: 500 13px var(--font); outline: none; color-scheme: inherit;
+}
+.tri-filter-field input:focus, .tri-filter-field select:focus, .tri-modal-box input:focus, .tri-modal-box textarea:focus { border-color: var(--green-500); box-shadow: 0 0 0 3px rgba(37,154,108,.10); }
+.tri-list { display: flex; flex-direction: column; gap: 18px; }
+.tri-quarter-group { border: 1px solid var(--border-card); border-radius: 12px; overflow: hidden; }
+.tri-quarter-title { padding: 14px 17px; display: flex; align-items: center; gap: 10px; background: rgba(37,154,108,.08); font-size: 13px; font-weight: 800; }
+.tri-quarter-title i { color: var(--green-400); }
+.tri-quarter-title .tri-count { margin-left: auto; border-radius: 999px; padding: 3px 9px; background: rgba(37,154,108,.14); color: var(--green-400); font: 700 11px var(--font-mono); }
+.tri-table-wrap { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.tri-table { border-collapse: collapse; width: 100%; min-width: 670px; table-layout: fixed; }
+.tri-table th { padding: 12px 16px; text-align: left; color: var(--text-muted); font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: .04em; border-bottom: 1px solid var(--border-card); }
+.tri-table td { padding: 14px 16px; font-size: 12px; color: var(--text-secondary); vertical-align: top; border-bottom: 1px solid var(--border-subtle); overflow-wrap: anywhere; }
+.tri-table tbody tr:last-child td { border-bottom: 0; }
+.tri-table th:nth-child(1) { width: 20%; }.tri-table th:nth-child(2) { width: 18%; }.tri-table th:nth-child(3) { width: 32%; }.tri-table th:nth-child(4) { width: 16%; }.tri-table th:nth-child(5) { width: 14%; }
+.tri-epic { font: 700 11px var(--font-mono); color: var(--green-400); }
+.tri-cell-actions { display: flex; flex-wrap: wrap; gap: 6px; }
+.tri-action { border: 1px solid var(--border-card); background: var(--bg-input); padding: 7px 9px; border-radius: 7px; color: var(--text-secondary); cursor: pointer; font-size: 11px; }
+.tri-action:hover { border-color: var(--green-500); color: var(--text-primary); }
+.tri-action--danger:hover { border-color: var(--status-err); color: var(--status-err); }
+.tri-placeholder { padding: 42px 16px; color: var(--text-muted); text-align: center; font-size: 13px; }
+.tri-placeholder i { display: block; font-size: 30px; color: var(--green-400); margin-bottom: 16px; }
+.tri-alert { padding: 16px; border: 1px solid var(--status-warn); border-radius: 10px; font-size: 13px; color: var(--text-primary); margin-bottom: 20px; background: var(--bg-surface); }
+.tri-footer { text-align: center; position: relative; z-index: 1; color: var(--text-muted); font-size: 11px; border-top: 1px solid var(--border-card); padding: 24px; }
+.tri-footer span { color: var(--green-400); }
+.tri-modal-overlay { position: fixed; inset: 0; z-index: 9998; background: rgba(0,0,0,.75); display: flex; align-items: center; justify-content: center; padding: 16px; overflow-y: auto; }
+.tri-modal-box { width: min(100%, 545px); margin: auto; padding: 25px; background: var(--bg-surface); color: var(--text-primary); border-radius: 16px; border: 1px solid var(--border-strong); box-shadow: 0 20px 80px rgba(0,0,0,.46); }
+.tri-modal-heading { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 22px; }
+.tri-modal-heading h2 { font-size: 20px; }
+.tri-icon-btn { background: var(--bg-input); color: var(--text-primary); border: 1px solid var(--border-card); border-radius: 7px; width: 34px; height: 34px; cursor: pointer; }
+.tri-modal-box form { display: flex; flex-direction: column; gap: 10px; }
+.tri-modal-box label { font-size: 12px; color: var(--text-secondary); font-weight: 700; }
+.tri-modal-box label span { color: var(--status-err); }
+.tri-modal-box textarea { resize: vertical; min-height: 92px; }
+.tri-field-hint { color: var(--text-muted); font-size: 10.5px; margin-top: -4px; margin-bottom: 7px; }
+.tri-form-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 15px; }
+.tri-form-actions .btn { font-size: 12px; }
+.tri-confirm-box { max-width: 420px; }.tri-confirm-box h2 { margin-bottom: 12px; }.tri-confirm-box p { font-size: 13px; color: var(--text-secondary); }
+.tri-modal-overlay.hidden { display: none !important; }
+@media (max-width: 700px) {
+  .app-navigation { padding: 9px 10px; gap: 6px; justify-content: center; }
+  .app-nav-link, .app-nav-theme { padding: 9px 10px; font-size: 10.5px; }
+  .tri-hero-inner { padding: 17px 16px 25px; }
+  .tri-brand { margin-bottom: 16px; flex-wrap: wrap; gap: 8px; }
+  .tri-brand img { width: 88px; height: 42px; }
+  .tri-hero-content { align-items: flex-start; flex-direction: column; gap: 18px; }
+  .tri-hero h1 { font-size: 36px; }
+  .tri-main { padding: 16px 12px; }
+  .tri-stats { gap: 7px; }
+  .tri-stat { padding: 11px; }
+  .tri-stat span { font-size: 9px; align-items: flex-start; }
+  .tri-stat strong { font-size: 22px; }
+  .tri-panel { padding: 14px 10px; }
+  .tri-filters { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .tri-filter-search { grid-column: 1 / -1; }
+  .tri-table { min-width: 620px; }
+  .tri-modal-box { padding: 18px; }
+}
+@media (max-width: 370px) { .tri-stats { grid-template-columns: 1fr; }.tri-stat { display: flex; align-items: center; justify-content: space-between; }.tri-stat strong { margin-top: 0; } }
+@media (prefers-reduced-motion: reduce) { .app-nav-link, .app-nav-theme, .historico-mes summary i { transition: none; } }
+
+/* Evita zoom automático em inputs no Safari iOS e melhora o toque. */
+@media (max-width: 700px) {
+  .tri-filter-field input, .tri-filter-field select,
+  .tri-modal-box input, .tri-modal-box textarea { font-size: 16px; min-height: 44px; }
+  .app-nav-link, .app-nav-theme { min-height: 44px; }
+  .tri-action { min-width: 40px; min-height: 40px; }
+}
